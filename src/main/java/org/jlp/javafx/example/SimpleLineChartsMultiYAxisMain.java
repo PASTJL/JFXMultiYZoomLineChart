@@ -33,6 +33,7 @@ import javafx.stage.Stage;
 /**
  * The Class SimpleLineChartsMultiYAxisMain.
  */
+
 public class SimpleLineChartsMultiYAxisMain extends Application {
 
 	/** The Constant X_DATA_COUNT. */
