@@ -1,0 +1,8 @@
+.readonly-checkbox *.text:disabled {
+    -fx-opacity: 1.0;
+}
+* .chart-line-symbol { 
+    -fx-background-color: #00FF00 ;
+   
+   
+}
