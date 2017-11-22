@@ -5,7 +5,7 @@
 	<title></title>
 	<meta name="generator" content="LibreOffice 5.4.1.2 (Linux)"/>
 	<meta name="created" content="2017-11-20T00:00:00.011244125"/>
-	<meta name="changed" content="2017-11-22T08:18:21.004465115"/>
+	<meta name="changed" content="2017-11-22T08:20:36.257625365"/>
 	<style type="text/css">
 		@page { margin: 2cm }
 		p { margin-bottom: 0.25cm; line-height: 120% }
@@ -19,7 +19,7 @@
 
 </p>
 <p style="margin-bottom: 0cm; line-height: 100%">At this time, with
-JFX / SDK 9, there is no native LineChart with several YAxis.</p>
+JFX / SDK 9, there is no native LineChart with several Yaxis.</p>
 <p style="margin-bottom: 0cm; line-height: 100%">For my needs I
 want&nbsp;:</p>
 <p style="margin-bottom: 0cm; line-height: 100%">- a XAxis shared by
@@ -64,6 +64,7 @@ personal work, I can obtain the result below :</p>
 
 </p>
 <p style="margin-bottom: 0cm; line-height: 100%"><img src="readme_md_m6354ea9a.jpg" name="images1" align="bottom" width="643" height="396" border="0"/>
+
 </p>
 <p style="margin-bottom: 0cm; line-height: 100%"><br/>
 
