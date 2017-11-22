@@ -46,13 +46,11 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 	 *
 	 * @param baseChart
 	 *            the base chart
-	 * @param lineColor
-	 *            the line color
 	 * @param strokeWidthpas
 	 *            the stroke widthpas
 	 */
-	public ZoomableLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Color lineColor, Double strokeWidthpas) {
-		this(baseChart, lineColor, strokeWidthpas, true);
+	public ZoomableLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Double strokeWidthpas) {
+		this(baseChart, strokeWidthpas, true);
 	}
 
 	/**
@@ -60,16 +58,13 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 	 *
 	 * @param baseChart
 	 *            the base chart
-	 * @param lineColor
-	 *            the line color
 	 * @param strokeWidthpas
 	 *            the stroke widthpas
 	 * @param popup
 	 *            the popup
 	 */
-	public ZoomableLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Color lineColor, Double strokeWidthpas,
-			boolean popup) {
-		super(baseChart, lineColor, strokeWidthpas, popup);
+	public ZoomableLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Double strokeWidthpas, boolean popup) {
+		super(baseChart, strokeWidthpas, popup);
 		// chartContainer.getChildren().add(chart);
 		baseChart.getXAxis().setAutoRanging(false);
 		baseChart.getYAxis().setAutoRanging(false);
@@ -202,7 +197,7 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 				.setUpperBound(Math.max(((NumberAxis) chart.getYAxis()).getUpperBound(), upperY));
 		((NumberAxis) chart.getYAxis()).setTickUnit(
 				(((NumberAxis) chart.getYAxis()).getUpperBound() - ((NumberAxis) chart.getYAxis()).getLowerBound())
-						/ nbTicks);
+						/ nbYTicks);
 
 		for (TupleStrLC tpl : backgroundCharts) {
 			boundYAxis(tpl.lineChart, null, true);
@@ -210,7 +205,7 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 		}
 		((NumberAxis) chart.getXAxis()).setTickUnit(
 				(((NumberAxis) chart.getXAxis()).getUpperBound() - ((NumberAxis) chart.getXAxis()).getLowerBound())
-						/ nbTicks);
+						/ nbXTicks);
 	}
 
 	/**
@@ -228,6 +223,8 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 		final NumberAxis yAxis = (NumberAxis) chart.getYAxis();
 		final NumberAxis yAxisBaseChart = (NumberAxis) baseChart.getYAxis();
 		yAxis.setAutoRanging(false);
+		chart.getXAxis().setAutoRanging(false);
+
 		Point2D yAxisInParent = yAxisBaseChart.localToScene(0, 0);
 
 		final NumberAxis xAxis = (NumberAxis) chart.getXAxis();
@@ -245,8 +242,8 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 
 		yAxis.setLowerBound(yAxis.getLowerBound() + yOffset / yAxisScale);
 		yAxis.setUpperBound(yAxis.getLowerBound() + Math.abs(zoomRect.getHeight() / yAxisScale)); // test
-		yAxis.setTickUnit((yAxis.getUpperBound() - yAxis.getLowerBound()) / nbTicks);
-		xAxis.setTickUnit((xAxis.getUpperBound() - xAxis.getLowerBound()) / nbTicks);
+		yAxis.setTickUnit((yAxis.getUpperBound() - yAxis.getLowerBound()) / nbYTicks);
+		xAxis.setTickUnit((xAxis.getUpperBound() - xAxis.getLowerBound()) / nbXTicks);
 		// System.out.println(yAxis.getLowerBound() + " " + yAxis.getUpperBound());
 
 		for (TupleStrLC tpl : backgroundCharts) {
@@ -280,7 +277,7 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 			double yAxisScale = yAxis.getScale();
 			yAxis.setLowerBound(yAxis.getLowerBound() + yOffset / yAxisScale);
 			yAxis.setUpperBound(yAxis.getLowerBound() + Math.abs(zoomRect.getHeight() / yAxisScale)); // test
-			yAxis.setTickUnit((yAxis.getUpperBound() - yAxis.getLowerBound()) / nbTicks);
+			yAxis.setTickUnit((yAxis.getUpperBound() - yAxis.getLowerBound()) / nbYTicks);
 			// xAxis.setTickUnit((xAxis.getUpperBound() - xAxis.getLowerBound()) / nbTicks);
 			// // Test
 		} else {
@@ -327,7 +324,7 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 
 			((NumberAxis) chart.getYAxis()).setTickUnit(
 					(((NumberAxis) chart.getYAxis()).getUpperBound() - ((NumberAxis) chart.getYAxis()).getLowerBound())
-							/ nbTicks);
+							/ nbYTicks);
 
 		}
 

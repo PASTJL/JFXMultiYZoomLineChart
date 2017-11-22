@@ -60,7 +60,8 @@ import javafx.util.StringConverter;
 public class SimpleLineChartsMultiYAxis extends StackPane {
 	public Map<String, Series<Number, Number>> hmXSortedSeries = new HashMap<String, Series<Number, Number>>();
 	public Map<String, Series<Number, Number>> hmYSortedSeries = new HashMap<String, Series<Number, Number>>();
-	public static int nbTicks = 20;
+	public static int nbXTicks = 40;
+	public static int nbYTicks = 20;
 	/** The base chart. */
 	protected final LineChart<Number, Number> baseChart;
 
@@ -130,13 +131,11 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	 *
 	 * @param baseChart
 	 *            the base chart
-	 * @param lineColor
-	 *            the line color
 	 * @param strokeWidthpas
 	 *            the stroke widthpas
 	 */
-	public SimpleLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Color lineColor, Double strokeWidthpas) {
-		this(baseChart, lineColor, strokeWidthpas, true);
+	public SimpleLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Double strokeWidthpas) {
+		this(baseChart, strokeWidthpas, true);
 	}
 
 	/**
@@ -144,15 +143,12 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	 *
 	 * @param baseChart
 	 *            the base chart
-	 * @param lineColor
-	 *            the line color
 	 * @param strokeWidthpas
 	 *            the stroke widthpas
 	 * @param popup
 	 *            the popup
 	 */
-	public SimpleLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Color lineColor, Double strokeWidthpas,
-			boolean popup) {
+	public SimpleLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Double strokeWidthpas, boolean popup) {
 		if (strokeWidthpas != null) {
 			this.strokeWidth = strokeWidthpas;
 		}
@@ -160,9 +156,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		this.baseChart = baseChart;
 		((NumberAxis) baseChart.getYAxis()).setTickLabelFormatter(new MyYaxisDoubleFormatter());
 		baseChart.setId("baseChart");
-		chartColorMap.put(baseChart, lineColor);
-		styleBaseChart(baseChart);
-		styleBaseChartLine(lineColor);
+
 		setFixedAxisWidth(baseChart);
 		setAlignment(Pos.CENTER_LEFT);
 		backgroundCharts.clear();
@@ -173,7 +167,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 
 		detailsWindow = new AnchorPane();
 		bindMouseEvents(baseChart, this.strokeWidth);
-		styleSymbol(baseChart, lineColor);
+
 		normalizeBaseChartBound();
 		rebuildChart();
 
@@ -182,7 +176,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	/**
 	 * Normalizes the baseChart with lowerBounds/upperBounds on X and Y Axis.
 	 *
-	 * @return void
+	 * return nothing
 	 */
 	private void normalizeBaseChartBound() {
 
@@ -225,9 +219,9 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		((NumberAxis) baseChart.getXAxis()).setUpperBound(dblMaxBoundX);
 
 		((NumberAxis) baseChart.getXAxis()).setTickUnit((((NumberAxis) baseChart.getXAxis()).getUpperBound()
-				- ((NumberAxis) baseChart.getXAxis()).getLowerBound()) / nbTicks);
+				- ((NumberAxis) baseChart.getXAxis()).getLowerBound()) / nbXTicks);
 		((NumberAxis) baseChart.getYAxis()).setTickUnit((((NumberAxis) baseChart.getYAxis()).getUpperBound()
-				- ((NumberAxis) baseChart.getYAxis()).getLowerBound()) / nbTicks);
+				- ((NumberAxis) baseChart.getYAxis()).getLowerBound()) / nbYTicks);
 		System.out.println("Yaxis LowBound=" + ((NumberAxis) baseChart.getYAxis()).getLowerBound());
 		System.out.println("Yaxis UpperBound=" + ((NumberAxis) baseChart.getYAxis()).getUpperBound());
 		System.out.println("xAxis tickUnit=" + ((NumberAxis) baseChart.getXAxis()).getTickUnit());
@@ -401,9 +395,9 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		styleSymbol(lineChart, chartColorMap.get(lineChart));
 		((NumberAxis) baseChart.getXAxis()).setAutoRanging(false);
 		((NumberAxis) baseChart.getXAxis()).setTickUnit((((NumberAxis) baseChart.getXAxis()).getUpperBound()
-				- ((NumberAxis) baseChart.getXAxis()).getLowerBound()) / nbTicks);
+				- ((NumberAxis) baseChart.getXAxis()).getLowerBound()) / nbXTicks);
 		((NumberAxis) baseChart.getYAxis()).setTickUnit((((NumberAxis) baseChart.getYAxis()).getUpperBound()
-				- ((NumberAxis) baseChart.getYAxis()).getLowerBound()) / nbTicks);
+				- ((NumberAxis) baseChart.getYAxis()).getLowerBound()) / nbYTicks);
 		return lineChart;
 	}
 
@@ -576,6 +570,10 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 
 			lineChart = baseChart;
 			lineChart.getYAxis().setLabel(unit);
+			chartColorMap.put(baseChart, lineColor);
+			styleBaseChart(baseChart);
+			styleBaseChartLine(lineColor);
+			styleSymbol(baseChart, lineColor);
 
 		} else {
 
@@ -644,14 +642,14 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				}
 				((NumberAxis) lineChart.getYAxis()).setTickLabelFormatter(new MyYaxisDoubleFormatter());
 				((NumberAxis) lineChart.getXAxis()).setTickUnit((((NumberAxis) lineChart.getXAxis()).getUpperBound()
-						- ((NumberAxis) lineChart.getXAxis()).getLowerBound()) / nbTicks);
+						- ((NumberAxis) lineChart.getXAxis()).getLowerBound()) / nbXTicks);
 				((NumberAxis) lineChart.getYAxis()).setTickUnit((((NumberAxis) lineChart.getYAxis()).getUpperBound()
-						- ((NumberAxis) lineChart.getYAxis()).getLowerBound()) / nbTicks);
+						- ((NumberAxis) lineChart.getYAxis()).getLowerBound()) / nbYTicks);
 				chartColorMap.put(lineChart, lineColor);
 
 				((NumberAxis) baseChart.getXAxis()).setTickUnit(
 						(xAxis.upperBoundProperty().doubleValue() - xAxis.lowerBoundProperty().doubleValue())
-								/ nbTicks);
+								/ nbXTicks);
 				this.backgroundCharts.add(new TupleStrLC(unit, lineChart));
 
 			}
@@ -674,9 +672,9 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 
 		((NumberAxis) lineChart.getYAxis()).setTickLabelFormatter(new MyYaxisDoubleFormatter());
 		((NumberAxis) lineChart.getXAxis()).setTickUnit((((NumberAxis) lineChart.getXAxis()).getUpperBound()
-				- ((NumberAxis) lineChart.getXAxis()).getLowerBound()) / nbTicks);
+				- ((NumberAxis) lineChart.getXAxis()).getLowerBound()) / nbXTicks);
 		((NumberAxis) lineChart.getYAxis()).setTickUnit((((NumberAxis) lineChart.getYAxis()).getUpperBound()
-				- ((NumberAxis) lineChart.getYAxis()).getLowerBound()) / nbTicks);
+				- ((NumberAxis) lineChart.getYAxis()).getLowerBound()) / nbYTicks);
 
 		lineChart.getYAxis().setAutoRanging(false);
 		lineChart.getData().add(series);
@@ -982,6 +980,8 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		 *            the y value under mouse
 		 * @param tolerance
 		 *            the tolerance
+		 * @param linechart
+		 *            the lineChart to inspect
 		 * @return true, if is mouse near line
 		 */
 		private boolean isMouseNearLine(Number realYValue, Number yValueUnderMouse, Double tolerance,

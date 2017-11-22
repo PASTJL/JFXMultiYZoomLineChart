@@ -49,8 +49,24 @@ compileJava {
       options.fork = true
       
 }
-task copyTask(type: Copy) {
+task copyTask1(type: Copy) {
     from './build/libs/JFXMultiYZoomLineChart.jar'
     into './libs/'
+    }
+
+task copyTask2(type: Copy) {
+    from './build/docs/javadoc'
+    into './javadoc/'
+}
+sourceSets {
+    build {
+        java.srcDir file('src/main/java')
+
+    }
+}
+task createJavadocs (type : Javadoc) {
+    source = sourceSets.main.allJava
+    classpath = configurations.compile
+     options.memberLevel = JavadocMemberLevel.PRIVATE
 }
 

@@ -1,1 +1,1 @@
-packageSearchIndex = [{"m":"org.jlp.javafx","l":"org.jlp.javafx.example"},{"m":"org.jlp.javafx","l":"org.jlp.javafx.ext"}]
+packageSearchIndex = [{"m":"org.jlp.javafx","l":"org.jlp.javafx"},{"m":"org.jlp.javafx","l":"org.jlp.javafx.example"},{"m":"org.jlp.javafx","l":"org.jlp.javafx.ext"}]

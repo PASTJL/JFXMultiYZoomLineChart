@@ -63,7 +63,7 @@ public class ZoomableLineChartsMultiYAxisMainXDate extends Application {
 			baseChart.getStylesheets().add(stylesheet.toString());
 		}
 		// The baseChart must be empty !
-		ZoomableLineChartsMultiYAxis chart = new ZoomableLineChartsMultiYAxis(baseChart, Color.RED, 1.0, false);
+		ZoomableLineChartsMultiYAxis chart = new ZoomableLineChartsMultiYAxis(baseChart, 1.0, false);
 		/*
 		 * To configure the verbosity of the popup Window information isPopupMuted =
 		 * true; no information isPopupFullVisible is inoperative isPopupMuted =
@@ -121,7 +121,7 @@ public class ZoomableLineChartsMultiYAxisMainXDate extends Application {
 	private XYChart.Series<Number, Number> prepareSeries(String name, Function<Long, Double> function) {
 		XYChart.Series<Number, Number> series = new XYChart.Series<>();
 		series.setName(name);
-		for (Long i = 0L; i < X_DATA_COUNT; i += 100) {
+		for (Long i = 0L; i <= X_DATA_COUNT; i += 100) {
 			series.getData().add(new XYChart.Data<>(1000 * i, function.apply(i)));
 		}
 		return series;

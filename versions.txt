@@ -7,6 +7,11 @@ Initial Version
 Version 0.1.1
 Correction of TickUnit in XAxis
 -----------------------------------------------------------------------------------
+23/Nov/2017
+Version 0.1.2
+Nb Ticks  for XAxis different of Nb Ticks  for XAxis
+new graddle.build for Javadoc
+-----------------------------------------------------------------------------------
 
 
 
