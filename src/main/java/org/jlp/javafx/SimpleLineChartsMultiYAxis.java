@@ -190,7 +190,10 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		Double dblMaxBoundX = Double.MIN_VALUE;
 		Double dblLowBound = Double.MAX_VALUE;
 		Double dblMaxBound = Double.MIN_VALUE;
+		/* initialing this , there is no Data */
 
+		if (baseChart.getData().isEmpty())
+			return;
 		for (Series<Number, Number> series : baseChart.getData()) {
 			// series.getData().sort(Comparator.comparingDouble(d ->
 			// d.getYValue().doubleValue()));

@@ -50,7 +50,7 @@ compileJava {
       
 }
 task copyTask(type: Copy) {
-    from '/build/libs/JFXMultiYZoomLineChart.jar'
-    into '/libs'
+    from './build/libs/JFXMultiYZoomLineChart.jar'
+    into './libs/'
 }
 

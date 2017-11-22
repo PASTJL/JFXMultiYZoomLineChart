@@ -233,21 +233,8 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 		final NumberAxis xAxis = (NumberAxis) chart.getXAxis();
 
 		Point2D xAxisInParent = xAxis.localToScene(0, 0);
-		// System.out.println(" coucou 0 -> zoomTopLeft.getX() = "+ zoomTopLeft.getX());
-		// System.out.println(" coucou 0 -> yAxisInParent.getX() = "+
-		// yAxisInParent.getX());
-		// System.out.println(" coucou 0 -> baseChart.getYAxis().getWidth() = "+
-		// baseChart.getYAxis().getWidth());
-		//
-		// double xOffset = zoomTopLeft.getX() - yAxisInParent.getX() - yAxisWidth;
 
 		double xOffset = zoomTopLeft.getX() - yAxisInParent.getX() - baseChart.getYAxis().getWidth();
-		//
-		// System.out.println(" coucou 1 -> zoomBottomRight.getY() = " +
-		// zoomBottomRight.getY());
-		// System.out.println(" coucou 1 -> xAxisInParent.getY() = " +
-		// xAxisInParent.getY());
-		// System.out.println(" coucou 1 -> xAxis.getHeight() = " + xAxis.getHeight());
 
 		double yOffset = zoomBottomRight.getY() - xAxisInParent.getY();// - xAxis.getHeight();
 		double xAxisScale = xAxis.getScale();
@@ -294,6 +281,8 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 			yAxis.setLowerBound(yAxis.getLowerBound() + yOffset / yAxisScale);
 			yAxis.setUpperBound(yAxis.getLowerBound() + Math.abs(zoomRect.getHeight() / yAxisScale)); // test
 			yAxis.setTickUnit((yAxis.getUpperBound() - yAxis.getLowerBound()) / nbTicks);
+			// xAxis.setTickUnit((xAxis.getUpperBound() - xAxis.getLowerBound()) / nbTicks);
+			// // Test
 		} else {
 			/* bounds with initial values */
 			double lowerY = Double.MAX_VALUE;

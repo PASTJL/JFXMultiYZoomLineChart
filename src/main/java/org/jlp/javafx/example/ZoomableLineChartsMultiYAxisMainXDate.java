@@ -97,8 +97,9 @@ public class ZoomableLineChartsMultiYAxisMainXDate extends Application {
 				((NumberAxis) chart.getBaseChart().getXAxis()).upperBoundProperty().longValue()
 						- ((NumberAxis) chart.getBaseChart().getXAxis()).lowerBoundProperty().longValue(),
 				Locale.FRANCE));
-		((NumberAxis) chart.getBaseChart().getXAxis())
-				.setTickUnit(MyTypeAxis.DATECONVERTER.getTickUnitDefaults()[MyTypeAxis.DATECONVERTER.idxUnit - 1]);
+		// ((NumberAxis) chart.getBaseChart().getXAxis())
+		// .setTickUnit(MyTypeAxis.DATECONVERTER.getTickUnitDefaults()[MyTypeAxis.DATECONVERTER.idxUnit
+		// - 1]);
 		chart.timeConverter = MyTypeAxis.DATECONVERTER.myConverter;
 
 		chart.setXLabel(((MyLongToDateConverter) chart.timeConverter).getTimeFormat());
