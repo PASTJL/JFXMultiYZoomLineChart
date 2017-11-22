@@ -5,7 +5,7 @@
 	<title></title>
 	<meta name="generator" content="LibreOffice 5.4.1.2 (Linux)"/>
 	<meta name="created" content="2017-11-20T00:00:00.011244125"/>
-	<meta name="changed" content="2017-11-22T08:23:23.198217140"/>
+	<meta name="changed" content="2017-11-22T08:24:52.324490847"/>
 	<style type="text/css">
 		@page { margin: 2cm }
 		p { margin-bottom: 0.25cm; line-height: 120% }
@@ -86,8 +86,8 @@ at the root and launch it for example as :</p>
 
 </p>
 <p style="margin-bottom: 0cm; font-variant: normal; font-style: normal; line-height: 100%; background: #ccffff">
-<font face="Courier New, monospace"><font size="2" style="font-size: 10pt"><b>/pathToJdk9Binjava
-/-Xms1024M -Xmx1024M --module-path /pathToTheJarFile -m
+<font face="Courier New, monospace"><font size="2" style="font-size: 10pt"><b>/pathToJdk9Bin/java
+-Xms1024M -Xmx1024M --module-path /pathToTheJarFile -m
 org.jlp.javafx/org.jlp.javafx.example.ZoomableLineChartsMultiYAxisMainXDate</b></font></font></p>
 <p style="margin-bottom: 0cm; line-height: 100%"><br/>
 
