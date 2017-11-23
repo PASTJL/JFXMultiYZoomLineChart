@@ -63,7 +63,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	public static int nbXTicks = 40;
 	public static int nbYTicks = 20;
 	/** The base chart. */
-	protected final LineChart<Number, Number> baseChart;
+	public final LineChart<Number, Number> baseChart;
 
 	/**
 	 * Getter for the main BaseChart of the StackPane.
@@ -129,31 +129,29 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	/**
 	 * Instantiates a new simple line charts multi Y axis.
 	 *
-	 * @param baseChart
-	 *            the base chart
 	 * @param strokeWidthpas
 	 *            the stroke widthpas
 	 */
-	public SimpleLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Double strokeWidthpas) {
-		this(baseChart, strokeWidthpas, true);
+	public SimpleLineChartsMultiYAxis(Double strokeWidthpas) {
+		this(strokeWidthpas, true);
 	}
 
 	/**
 	 * Instantiates a new simple line charts multi Y axis.
 	 *
-	 * @param baseChart
-	 *            the base chart
 	 * @param strokeWidthpas
 	 *            the stroke widthpas
 	 * @param popup
 	 *            the popup
 	 */
-	public SimpleLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Double strokeWidthpas, boolean popup) {
+	public SimpleLineChartsMultiYAxis(Double strokeWidthpas, boolean popup) {
 		if (strokeWidthpas != null) {
 			this.strokeWidth = strokeWidthpas;
 		}
 		this.isPopupFullVisible = popup;
-		this.baseChart = baseChart;
+		NumberAxis xAxis = new NumberAxis();
+		NumberAxis yAxis = new NumberAxis();
+		this.baseChart = new LineChart<Number, Number>(xAxis, yAxis);
 		((NumberAxis) baseChart.getYAxis()).setTickLabelFormatter(new MyYaxisDoubleFormatter());
 		baseChart.setId("baseChart");
 

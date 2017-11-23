@@ -23,8 +23,6 @@ import org.jlp.javafx.SimpleLineChartsMultiYAxis;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -46,21 +44,17 @@ public class SimpleLineChartsMultiYAxisMain extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		NumberAxis xAxis = new NumberAxis();
-		NumberAxis yAxis = new NumberAxis();
 
-		LineChart<Number, Number> baseChart = new LineChart<Number, Number>(xAxis, yAxis);
-
+		// The baseChart must be empty !
+		SimpleLineChartsMultiYAxis chart = new SimpleLineChartsMultiYAxis(1.0);
 		URL stylesheet = SimpleLineChartsMultiYAxisMain.class.getResource("/org/jlp/javafx/style.css");
 		if (null == stylesheet) {
 			System.out.println("Null Pointer to style.css");
 			System.out.println("jarLocation" + Scene.class.getProtectionDomain().getCodeSource().getLocation());
 		} else {
 			System.out.println("Yes !! style.css found");
-			baseChart.getStylesheets().add(stylesheet.toString());
+			chart.getStylesheets().add(stylesheet.toString());
 		}
-		// The baseChart must be empty !
-		SimpleLineChartsMultiYAxis chart = new SimpleLineChartsMultiYAxis(baseChart, 1.0);
 
 		/*
 		 * To configure the verbosity of the popup Window information isPopupMuted =

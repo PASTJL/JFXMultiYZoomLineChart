@@ -26,7 +26,6 @@ import org.jlp.javafx.ext.MyTypeAxis;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
@@ -51,21 +50,18 @@ public class SimpleLineChartsMultiYAxisMainXDate extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		NumberAxis xAxis = new NumberAxis(0, X_DATA_COUNT, 200);
-		NumberAxis yAxis = new NumberAxis();
 
-		LineChart<Number, Number> baseChart = new LineChart<Number, Number>(xAxis, yAxis);
-
+		// The baseChart must be empty !
+		SimpleLineChartsMultiYAxis chart = new SimpleLineChartsMultiYAxis(1.0);
 		URL stylesheet = SimpleLineChartsMultiYAxisMainXDate.class.getResource("/org/jlp/javafx/style.css");
 		if (null == stylesheet) {
 			System.out.println("Null Pointer to style.css");
 			System.out.println("jarLocation" + Scene.class.getProtectionDomain().getCodeSource().getLocation());
 		} else {
 			System.out.println("Yes !! style.css found");
-			baseChart.getStylesheets().add(stylesheet.toString());
+			chart.getStylesheets().add(stylesheet.toString());
 		}
-		// The baseChart must be empty !
-		SimpleLineChartsMultiYAxis chart = new SimpleLineChartsMultiYAxis(baseChart, 1.0);
+
 		/*
 		 * To configure the verbosity of the popup Window information isPopupMuted =
 		 * true; no information isPopupFullVisible is inoperative isPopupMuted =
@@ -93,14 +89,12 @@ public class SimpleLineChartsMultiYAxisMainXDate extends Application {
 		 * Block that formats date using class MyTypeAxis and a StringConverter
 		 * MyLongToDateConverter
 		 */
-		((NumberAxis) baseChart.getXAxis())
-				.setTickLabelFormatter(
-						MyTypeAxis.DATECONVERTER.dateConverter(
-								((NumberAxis) baseChart.getXAxis()).upperBoundProperty().longValue()
-										- ((NumberAxis) baseChart.getXAxis()).lowerBoundProperty().longValue(),
-								Locale.FRANCE));
-		((NumberAxis) baseChart.getXAxis())
-				.setTickUnit(MyTypeAxis.DATECONVERTER.getTickUnitDefaults()[MyTypeAxis.DATECONVERTER.idxUnit - 1]);
+		((NumberAxis) chart.baseChart.getXAxis())
+				.setTickLabelFormatter(MyTypeAxis.DATECONVERTER.dateConverter(
+						((NumberAxis) chart.baseChart.getXAxis()).upperBoundProperty().longValue()
+								- ((NumberAxis) chart.baseChart.getXAxis()).lowerBoundProperty().longValue(),
+						Locale.FRANCE));
+
 		chart.timeConverter = MyTypeAxis.DATECONVERTER.myConverter;
 
 		chart.setXLabel(((MyLongToDateConverter) chart.timeConverter).getTimeFormat());

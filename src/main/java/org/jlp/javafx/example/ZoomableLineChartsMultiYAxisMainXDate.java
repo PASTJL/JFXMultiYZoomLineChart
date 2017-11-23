@@ -27,7 +27,6 @@ import org.jlp.javafx.ext.MyTypeAxis;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
@@ -49,21 +48,17 @@ public class ZoomableLineChartsMultiYAxisMainXDate extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		NumberAxis xAxis = new NumberAxis(0, X_DATA_COUNT, 200);
-		NumberAxis yAxis = new NumberAxis();
 
-		LineChart<Number, Number> baseChart = new LineChart<Number, Number>(xAxis, yAxis);
-
+		// The baseChart must be empty !
+		ZoomableLineChartsMultiYAxis chart = new ZoomableLineChartsMultiYAxis(1.0, false);
 		URL stylesheet = ZoomableLineChartsMultiYAxisMainXDate.class.getResource("/org/jlp/javafx/style.css");
 		if (null == stylesheet) {
 			System.out.println("Null Pointer to style.css");
 			System.out.println("jarLocation" + Scene.class.getProtectionDomain().getCodeSource().getLocation());
 		} else {
 			System.out.println("Yes !! style.css found");
-			baseChart.getStylesheets().add(stylesheet.toString());
+			chart.getStylesheets().add(stylesheet.toString());
 		}
-		// The baseChart must be empty !
-		ZoomableLineChartsMultiYAxis chart = new ZoomableLineChartsMultiYAxis(baseChart, 1.0, false);
 		/*
 		 * To configure the verbosity of the popup Window information isPopupMuted =
 		 * true; no information isPopupFullVisible is inoperative isPopupMuted =

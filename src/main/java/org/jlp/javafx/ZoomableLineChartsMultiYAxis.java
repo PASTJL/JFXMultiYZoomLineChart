@@ -44,27 +44,23 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 	/**
 	 * Instantiates a new zoomable line charts multi Y axis.
 	 *
-	 * @param baseChart
-	 *            the base chart
 	 * @param strokeWidthpas
 	 *            the stroke widthpas
 	 */
-	public ZoomableLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Double strokeWidthpas) {
-		this(baseChart, strokeWidthpas, true);
+	public ZoomableLineChartsMultiYAxis(Double strokeWidthpas) {
+		this(strokeWidthpas, true);
 	}
 
 	/**
 	 * Instantiates a new zoomable line charts multi Y axis.
 	 *
-	 * @param baseChart
-	 *            the base chart
 	 * @param strokeWidthpas
 	 *            the stroke widthpas
 	 * @param popup
 	 *            the popup
 	 */
-	public ZoomableLineChartsMultiYAxis(LineChart<Number, Number> baseChart, Double strokeWidthpas, boolean popup) {
-		super(baseChart, strokeWidthpas, popup);
+	public ZoomableLineChartsMultiYAxis(Double strokeWidthpas, boolean popup) {
+		super(strokeWidthpas, popup);
 		// chartContainer.getChildren().add(chart);
 		baseChart.getXAxis().setAutoRanging(false);
 		baseChart.getYAxis().setAutoRanging(false);
@@ -72,8 +68,6 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 		final Rectangle zoomRect = new Rectangle();
 		zoomRect.setManaged(false);
 		zoomRect.setFill(Color.LIGHTGRAY.deriveColor(0, 1, 1, 0.5));
-		// zoomRect.setFill(Color.BLACK);
-		// chartContainer.getChildren().add(zoomRect);
 
 		getChildren().add(zoomRect);
 		setUpZooming(zoomRect, baseChart.getParent());
