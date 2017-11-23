@@ -4,13 +4,8 @@
 	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 	<title></title>
 	<meta name="generator" content="LibreOffice 5.4.1.2 (Linux)"/>
-	<meta name="created" content="2017-11-20T00:00:00.011244125"/>
-	<meta name="changed" content="2017-11-22T08:24:52.324490847"/>
-	<style type="text/css">
-		@page { margin: 2cm }
-		p { margin-bottom: 0.25cm; line-height: 120% }
-		a:link { so-language: zxx }
-	</style>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="00:00:00"/>
 </head>
 <body lang="en-US" dir="ltr">
 <p align="center" style="margin-top: 0.42cm; margin-bottom: 0.21cm; line-height: 100%; page-break-after: avoid">
