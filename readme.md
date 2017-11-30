@@ -63,7 +63,7 @@ The command below becomes :</P>
 -Xms1024M -Xmx1024M --module-path /pathToParentOf_libs/libs -m
 org.jlp.javafx/org.jlp.javafx.example.ZoomableLineChartsMultiYAxisMainXDate</B></FONT></FONT></P>
 <P STYLE="margin-bottom: 0cm; line-height: 100%"><I>If you want to
-test in early version of JDK, you have to modify the JDK Source and
+test in older versions of JDK, you have to modify the JDK Source and
 Target in build.gradle and rename file <B>module-info.java </B>( to
 module-info.java.no_use for example).</I></P>
 <P STYLE="margin-bottom: 0cm; line-height: 100%">I will continue to
