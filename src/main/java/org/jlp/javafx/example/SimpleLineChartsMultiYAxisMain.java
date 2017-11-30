@@ -44,7 +44,7 @@ public class SimpleLineChartsMultiYAxisMain extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-
+		
 		// The baseChart must be empty !
 		SimpleLineChartsMultiYAxis chart = new SimpleLineChartsMultiYAxis(1.0);
 		URL stylesheet = SimpleLineChartsMultiYAxisMain.class.getResource("/org/jlp/javafx/style.css");
@@ -78,6 +78,7 @@ public class SimpleLineChartsMultiYAxisMain extends Application {
 
 		primaryStage.setTitle("MultipleAxesLineChart");
 
+		
 		Scene scene = new Scene(chart, 1024, 600);
 		chart.setXLabel("label");
 

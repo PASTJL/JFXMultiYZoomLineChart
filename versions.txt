@@ -1,7 +1,11 @@
-					Versions from newest to oldest
-
+Versions from newest to oldest
 
 -----------------------------------------------------------------------------------
+30/Nov/2017
+Version 0.2.0
+Improving SimpleLineChartsMultiYAxis ( Hiding / reshowing series.
+Better playing with fx css style.
+---------------------------------------------------------------------------------
 23/Nov/2017
 Version 0.1.3
 Simpliflying constructors for SimpleLineChartsMultiYAxis and ZoomableLineChartMultiYAxis
@@ -18,4 +22,3 @@ Correction of TickUnit in XAxis
 15/Nov/2017
 Version 0.1
 Initial Version
------------------------------------------------------------------------------------

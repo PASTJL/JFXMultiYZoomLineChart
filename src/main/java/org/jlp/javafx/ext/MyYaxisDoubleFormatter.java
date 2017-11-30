@@ -36,6 +36,9 @@ public class MyYaxisDoubleFormatter extends StringConverter<Number> {
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see javafx.util.StringConverter#toString(java.lang.Object)
+	 */
 	@Override
 	public String toString(Number aNumber) {
 

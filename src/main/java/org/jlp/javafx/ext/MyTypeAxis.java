@@ -148,7 +148,7 @@ public enum MyTypeAxis {
 		int idx = 0;
 		double cbInt = (double) interval;
 		for (double v : TICK_UNIT_DEFAULTS) {
-			System.out.println("v=" + (double) v + " ; interval=" + interval);
+		//	System.out.println("v=" + (double) v + " ; interval=" + interval);
 			if ((double) v >= cbInt) {
 
 				myConverter = new MyLongToDateConverter(TICK_UNIT_FORMATTER_DEFAULTS[idx], loc);
@@ -157,7 +157,7 @@ public enum MyTypeAxis {
 			}
 			idx++;
 		}
-		System.out.println("TICK_UNIT_FORMATTER_DEFAULTS[" + idx + "] =" + TICK_UNIT_FORMATTER_DEFAULTS[idx]);
+	//	System.out.println("TICK_UNIT_FORMATTER_DEFAULTS[" + idx + "] =" + TICK_UNIT_FORMATTER_DEFAULTS[idx]);
 		return myConverter;
 	}
 

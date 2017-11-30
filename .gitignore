@@ -1,9 +1,5 @@
 /.gradle/
 /build/
-/.project
-/.classpath
-/lauchInstru.cmd
-/launchInstru.ksh
-/launchSimple.cmd
-/launchZoom.cmd
 /readme.odt
+/bin/
+/.project

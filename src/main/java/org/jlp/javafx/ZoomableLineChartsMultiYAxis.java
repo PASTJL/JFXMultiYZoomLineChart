@@ -146,7 +146,7 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 	 *            the chart
 	 */
 	private void doReset(LineChart<Number, Number> chart) {
-		System.out.println("reseting " + chart.getYAxis().getLabel());
+		//System.out.println("reseting " + chart.getYAxis().getLabel());
 		double lowerX = Double.MAX_VALUE;
 		double upperX = Double.MIN_VALUE;
 		double lowerY = Double.MAX_VALUE;
