@@ -113,9 +113,9 @@ public class ZoomableLineChartsMultiYAxisMainXDate extends Application {
 
 		alert.setHeaderText(null);
 
-		alert.setContentText("trying to hide " + "Pivot2");
+		alert.setContentText("trying to hide " + "Pivot5");
 		alert.showAndWait();
-		chart.hideSerie("Pivot2");
+		chart.hideSerie("Pivot5");
 
 		alert = new Alert(AlertType.INFORMATION);
 
@@ -124,9 +124,9 @@ public class ZoomableLineChartsMultiYAxisMainXDate extends Application {
 		alert.setTitle("Information Dialog");
 
 		alert.setHeaderText(null);
-		alert.setContentText("trying to reshow " + "Pivot2");
+		alert.setContentText("trying to reshow " + "Pivot5");
 		alert.showAndWait();
-		chart.reShow("Pivot2");
+		chart.reShow("Pivot5");
 	}
 
 	/**

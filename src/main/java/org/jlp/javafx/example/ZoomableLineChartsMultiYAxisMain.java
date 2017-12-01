@@ -25,6 +25,8 @@ import org.jlp.javafx.ZoomableLineChartsMultiYAxis;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -72,7 +74,7 @@ public class ZoomableLineChartsMultiYAxisMain extends Application {
 		// important : the name of the series must be unique ( Pivot2 Pivot3 ...)
 		chart.addSeries(prepareSeries("Pivot2", (x) -> (double) 1.5 * x * Math.sqrt(x)), Color.GREEN, "Ko/s");
 		chart.addSeries(prepareSeries("Pivot3", (x) -> (double) -4.5 * x), Color.BLUE, "count");
-		chart.addSeries(prepareSeries("Pivot3", (x) -> ((double) (2)) * x, 0L), Color.GREEN, "Mo");
+		chart.addSeries(prepareSeries("Pivot4", (x) -> ((double) (2)) * x, 0L), Color.GREEN, "Mo");
 		chart.addSeries(prepareSeries("Pivot5", (x) -> ((double) (x + 100) * (x - 200)), 3600000L), Color.BLACK,
 				"Km/s");
 
@@ -82,6 +84,22 @@ public class ZoomableLineChartsMultiYAxisMain extends Application {
 
 		primaryStage.setScene(scene);
 		primaryStage.show();
+		chart.setXLabel("Units");
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert = new Alert(AlertType.INFORMATION);
+
+		alert.setResizable(true);
+
+		alert.setTitle("Information Dialog");
+
+		alert.setHeaderText(null);
+
+		alert.showAndWait();
+		chart.hideSerie("Pivot2");
+		chart.hideSerie("Pivot3");
+		alert.setContentText("reset");
+		alert.showAndWait();
+		chart.reset();
 	}
 
 	/**

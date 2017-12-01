@@ -62,7 +62,8 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 
 	/** The dbl formatter. */
 	protected MyYaxisDoubleFormatter dblFormatter = new MyYaxisDoubleFormatter();
-	
+	/** The is re showing serie. */
+	private boolean isClearing = false;
 	/** The is re showing serie. */
 	private boolean isReShowingSerie = false;
 	/** The is rebuild base chart. */
@@ -123,7 +124,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	}
 
 	/** The chart color map. */
-	protected final Map<LineChart<Number, Number>, Color> chartColorMap = new HashMap<>();
+	protected final Map<LineChart<Number, Number>, Color> chartColorMap = new HashMap<LineChart<Number, Number>, Color>();
 
 	/**
 	 * The Constant hmBoldAxis a hashMap with keys are LineChart and value a boolean
@@ -168,10 +169,10 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		if (strokeWidthpas != null) {
 			this.strokeWidth = strokeWidthpas;
 		}
-		
+
 		isRebuildBaseChart = false;
 		isReShowingSerie = false;
-	  isPopupFullVisible = popup;
+		isPopupFullVisible = popup;
 		NumberAxis xAxis = new NumberAxis();
 		NumberAxis yAxis = new NumberAxis();
 		this.baseChart = new LineChart<Number, Number>(xAxis, yAxis);
@@ -182,14 +183,15 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		setAlignment(Pos.CENTER_LEFT);
 		backgroundCharts.clear();
 		backgroundCharts.addListener((Observable observable) -> {
-			// System.out.println("an event occurs in backgroundCharts");
-			rebuildChart();
+
+			if (!isClearing)// System.out.println("an event occurs in backgroundCharts");
+				rebuildChart();
 		});
-		
+
 		detailsWindow = new AnchorPane();
 		getChildren().add(detailsWindow);
 		detailsWindow.getChildren().add(detailsPopup);
-		
+
 		bindMouseEvents(baseChart, this.strokeWidth);
 
 		normalizeBaseChartBound();
@@ -507,7 +509,6 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		});
 		chartBackground.setOnMouseMoved(event -> {
 
-			
 			// set hmBoldAxis to false
 			for (Entry<LineChart<Number, Number>, Boolean> entry : hmBoldAxis.entrySet()) {
 				hmBoldAxis.put(entry.getKey(), false);
@@ -564,7 +565,8 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	/**
 	 * Re show.
 	 *
-	 * @param nameSerie the name serie
+	 * @param nameSerie
+	 *            the name serie
 	 */
 	public void reShow(String nameSerie) {
 		// Verify that this nameSerie is hidden
@@ -585,27 +587,102 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 			tupBoolLC.lineChart.getYAxis().setTickLabelGap(0);
 		}
 
-		
-		
 		setXLabel("      ");
 		int idx = retrieveLineChartInbackgroundCharts(tupBoolLC.lineChart);
-		
+
 		if (idx >= 0) {
 
 			this.backgroundCharts.remove(idx);
 		}
-		
 
 		tupBoolLC.lineChart.setAnimated(true);
-		
+
 		serie.setName(nameSerie);
-		LineChart<Number,Number> retLC=this.addSeries(serie, col, tupBoolLC.lineChart.getYAxis().getLabel());
+		LineChart<Number, Number> retLC = this.addSeries(serie, col, tupBoolLC.lineChart.getYAxis().getLabel());
 		this.isReShowingSerie = false;
 		retLC.setCreateSymbols(true);
-		
-		retLC.setAnimated(true);
-		if (baseChart.getXAxis().getLabel()!= null) retLC.getXAxis().setLabel("    ");
 
+		retLC.setAnimated(true);
+		if (baseChart.getXAxis().getLabel() != null)
+			retLC.getXAxis().setLabel("    ");
+
+	}
+
+	/**
+	 * Rebound basechart X axis.
+	 */
+	private void reboundBasechartXAxis() {
+		Double dblLowBoundX = Double.MAX_VALUE;
+		Double dblMaxBoundX = Double.MIN_VALUE;
+		TupleBoolLC tupBoolStr = null;
+
+		for (String nameSeries : this.hmXSortedSeries.keySet()) {
+			tupBoolStr = this.hmVisibleSeries.get(nameSeries);
+			if (null != tupBoolStr && tupBoolStr.isVisible) {
+
+				Series<Number, Number> serie = hmXSortedSeries.get(nameSeries);
+				if (dblLowBoundX >= serie.getData().get(0).getXValue().doubleValue()) {
+					dblLowBoundX = serie.getData().get(0).getXValue().doubleValue();
+				}
+				if (dblMaxBoundX <= serie.getData().get(serie.getData().size() - 1).getXValue().doubleValue()) {
+					dblMaxBoundX = serie.getData().get(serie.getData().size() - 1).getXValue().doubleValue();
+				}
+			} else {
+				// bug
+				System.out.println("tupBoolStr not retrieved");
+			}
+		}
+		((NumberAxis) baseChart.getXAxis()).setLowerBound(dblLowBoundX);
+		((NumberAxis) baseChart.getXAxis()).setUpperBound(dblMaxBoundX);
+	}
+	
+	/**
+	 * Reset.
+	 */
+	public void reset() {
+		for(Entry<String, TupleBoolLC>  entry:this.hmVisibleSeries.entrySet()) {
+			if (!entry.getValue().isVisible) {
+				this.reShow(entry.getKey());
+			}
+		}
+	}
+
+	/**
+	 * Clear.
+	 */
+	public void clear() {
+		this.getChildren().clear();
+		//
+		hmVisibleSeries.clear();
+		hmXSortedSeries.clear();
+		hmYSortedSeries.clear();
+		hmBoldAxis.clear();
+
+		isClearing = true;
+		//
+		this.backgroundCharts.clear();
+		this.chartColorMap.clear();
+		
+		// recreating baseChart
+		NumberAxis xAxis = new NumberAxis();
+		NumberAxis yAxis = new NumberAxis();
+		this.baseChart = new LineChart<Number, Number>(xAxis, yAxis);
+		((NumberAxis) baseChart.getYAxis()).setTickLabelFormatter(new MyYaxisDoubleFormatter());
+		baseChart.setId("baseChart");
+
+		setFixedAxisWidth(baseChart);
+		setAlignment(Pos.CENTER_LEFT);
+		
+
+		detailsWindow.getChildren().clear();
+		getChildren().add(detailsWindow);
+		detailsWindow.getChildren().add(detailsPopup);
+
+		bindMouseEvents(baseChart, this.strokeWidth);
+
+		normalizeBaseChartBound();
+		rebuildChart();
+		isClearing = false;
 	}
 
 	/**
@@ -656,12 +733,13 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 
 					baseChart.setId("baseChart");
 					bindMouseEvents(baseChart, this.strokeWidth);
+
 				}
 
 			}
 
 		}
-
+		reboundBasechartXAxis();
 	}
 
 	/**
@@ -682,17 +760,22 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		}
 
 		return -1;
+		
 	}
 
 	/**
 	 * Adds the series.
 	 *
-	 * @param series            the series
-	 * @param lineColor            the line color
-	 * @param unit            the unit
+	 * @param series
+	 *            the series
+	 * @param lineColor
+	 *            the line color
+	 * @param unit
+	 *            the unit
 	 * @return the line chart
 	 */
-	public final LineChart<Number,Number> addSeries(XYChart.Series<Number, Number> series, Color lineColor, String unit) {
+	public final LineChart<Number, Number> addSeries(XYChart.Series<Number, Number> series, Color lineColor,
+			String unit) {
 
 		// create chart
 		// Search first if a LineChar with the same unit exists
@@ -742,12 +825,12 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		maxYSeries
 				.setValue(hmYSortedSeries.get(series.getName()).getData().get(series.getData().size() - 1).getYValue());
 		if (baseChart.getData().isEmpty()) {
-			// System.out.println("Init baseChart with serie :" + series.getName());
+			 System.out.println("Init baseChart with serie :" + series.getName());
 
 			lineChart = baseChart;
 			lineChart.getYAxis().setLabel(unit);
 			chartColorMap.put(lineChart, lineColor);
-			styleBaseChart(lineChart);
+			 styleBaseChart(lineChart);
 			styleBaseChartLine(lineColor);
 			styleSymbol(lineChart, lineColor);
 
@@ -826,7 +909,6 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				((NumberAxis) baseChart.getXAxis()).setTickUnit(
 						(xAxis.upperBoundProperty().doubleValue() - xAxis.lowerBoundProperty().doubleValue())
 								/ nbXTicks);
-				
 
 				this.backgroundCharts.add(new TupleStrLC(unit, lineChart));
 
@@ -864,6 +946,11 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		hmVisibleSeries.put(series.getName(), new TupleBoolLC(true, lineChart));
 		// System.out.println("hmVisible -> " +
 		// hmVisibleSeries.get(series.getName()).lineChart.getYAxis().getLabel());
+		if (lineChart==baseChart) {
+			System.out.println("rebounding XAis");
+			reboundBasechartXAxis();
+			//rebuildChart();
+		}
 		return lineChart;
 	}
 
@@ -1054,7 +1141,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 
 						String newStyleString = newStyle(oldStyle, "-fx-stroke-width: 3px",
 								"-fx-stroke-width:\\s*\\d+(px|\\.?\\d+?)");
-						
+
 						lc.lineChart.getData().get(i).getNode().setStyle(newStyleString);
 
 						// Color for the Axis border with a transparency 80 => 0.5
@@ -1067,7 +1154,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 
 						String newStyleString = newStyle(oldStyle, "-fx-stroke-width: 1px",
 								"-fx-stroke-width:\\s*\\d+(px|\\.?\\d+?)");
-						
+
 						lc.lineChart.getData().get(i).getNode().setStyle(newStyleString);
 
 						if (SimpleLineChartsMultiYAxis.hmBoldAxis.containsKey(lc.lineChart)
@@ -1122,27 +1209,30 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		/**
 		 * New style.
 		 *
-		 * @param OldStyle the old style
-		 * @param addNewStyle the add new style
-		 * @param regextoReplace the regexto replace
+		 * @param OldStyle
+		 *            the old style
+		 * @param addNewStyle
+		 *            the add new style
+		 * @param regextoReplace
+		 *            the regexto replace
 		 * @return the string
 		 */
 		private String newStyle(String OldStyle, String addNewStyle, String regextoReplace) {
 			StringBuilder strB = new StringBuilder();
 			String[] arrayOldStyle = OldStyle.split(";");
-			
+
 			for (String frag : arrayOldStyle) {
 				if (frag.trim().matches(regextoReplace)) {
 					/* Skip the Value */
-					
+
 				} else {
 
 					strB.append(frag).append(";");
 				}
 
 			}
-		/* Added only Once at the end */
-				strB.append(addNewStyle).append(";");
+			/* Added only Once at the end */
+			strB.append(addNewStyle).append(";");
 
 			return strB.toString();
 		}
@@ -1185,7 +1275,6 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				String newStyleString = newStyle(oldStyle, "-fx-stroke-width: 3px",
 						"-fx-stroke-width:\\s*\\d+(px|\\.?\\d+?)");
 
-				
 				lineChart.getData().get(idxSeries).getNode().setStyle(newStyleString);
 				if (lineChart.equals(baseChart)) {
 					// Color for the Axis border with a transparency 80 => 0.5
@@ -1216,9 +1305,9 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				popupRow = new HBox(10, seriesName, new Label(
 						"[" + timeConverter.toString(xValueLong) + ";" + dblFormatter.toString(yValueForChart) + "]"));
 			} else {
-				
-				popupRow = new HBox(10, seriesName, new Label(
-						"[" + dblFormatter.toString(xValueLong.doubleValue()) + ";" + dblFormatter.toString(yValueForChart) + "]"));
+
+				popupRow = new HBox(10, seriesName, new Label("[" + dblFormatter.toString(xValueLong.doubleValue())
+						+ ";" + dblFormatter.toString(yValueForChart) + "]"));
 			}
 			return popupRow;
 		}

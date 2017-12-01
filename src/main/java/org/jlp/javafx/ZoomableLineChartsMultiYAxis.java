@@ -111,7 +111,8 @@ public class ZoomableLineChartsMultiYAxis extends SimpleLineChartsMultiYAxis {
 		zoomingNode.setOnMouseReleased(event -> {
 			if (isDraging) {
 				isDraging = false;
-				if (event.getX() > debDragging.getX()) {
+				//if (event.getX() > debDragging.getX() ) {
+				if(Math.abs(rect.getHeight()) > 10) {
 					/* Zoom action */
 					doZoom(rect, baseChart);
 

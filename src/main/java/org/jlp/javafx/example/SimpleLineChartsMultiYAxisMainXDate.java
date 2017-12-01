@@ -72,7 +72,7 @@ public class SimpleLineChartsMultiYAxisMainXDate extends Application {
 		 * series information are visible
 		 */
 		SimpleLineChartsMultiYAxis.isPopupMuted = false;
-		SimpleLineChartsMultiYAxis.isPopupFullVisible = true;
+		SimpleLineChartsMultiYAxis.isPopupFullVisible = false;
 
 		// important : Don't use the way chart.baseChart.getData().add(series), use
 		// instead
@@ -156,6 +156,28 @@ public class SimpleLineChartsMultiYAxisMainXDate extends Application {
 
 		chart.reShow(strSer);
 		System.out.println("after reshowing " + strSer);
+		chart.setXLabel(((MyLongToDateConverter) chart.timeConverter).getTimeFormat());
+
+		alert.setResizable(true);
+
+		alert.setTitle("Information Dialog");
+
+		alert.setHeaderText(null);
+		alert.setContentText("ClearAll");
+
+		alert.showAndWait();
+		chart.clear();
+		alert.setContentText("reconstructing Series");
+
+		alert.showAndWait();
+		chart.addSeries(prepareSeries("Pivot2", (x) -> (double) -1.5d * x * x), Color.BLACK, "Mo/s");
+		chart.addSeries(prepareSeries("Pivot2Bis", (x) -> (double) -1.5d * x * Math.sqrt(x)), Color.RED, "toDestroy");
+		chart.addSeries(prepareSeries("Pivot3", (x) -> (double) -1.5 * x), Color.BLUE, "Units");
+		chart.addSeries(prepareSeries("Pivot4", (x) -> ((double) 2 * x), 0L), Color.GREEN, "Octets");
+		chart.addSeries(prepareInverseSeries("Pivot5", (x) -> ((double) (x + 100) * (x - 200)), 0L), Color.RED,
+				"toDestroy");
+
+		// To Align all LineCharts
 		chart.setXLabel(((MyLongToDateConverter) chart.timeConverter).getTimeFormat());
 	}
 
