@@ -1,11 +1,6 @@
-							Versions from newest to oldest
+Versions from newest to oldest
 
 -----------------------------------------------------------------------------------
-01/Dec/2017
-Version 0.2.1
-Improving SimpleLineChartsMultiYAxis/ZoomableLineChartsMultiAxis (clearAll, reset, 
-									Zoom if rectangle.height > 10px else reset)
---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 30/Nov/2017
 Version 0.2.0
 Improving SimpleLineChartsMultiYAxis ( Hiding / reshowing series).

@@ -29,8 +29,6 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -41,8 +39,14 @@ import javafx.stage.Stage;
 public class ZoomableLineChartsMultiYAxisMainXDate extends Application {
 
 	/** The Constant X_DATA_COUNT. */
-	public static final int X_DATA_COUNT = 3600;
+	public static final int X_DATA_COUNT = 36000;
 
+	/**
+	 * Start.
+	 *
+	 * @param primaryStage the primary stage
+	 * @throws Exception the exception
+	 */
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -104,29 +108,29 @@ public class ZoomableLineChartsMultiYAxisMainXDate extends Application {
 		System.out.println("chart.timeConverter -> " + ((MyLongToDateConverter) chart.timeConverter).getTimeFormat());
 		primaryStage.setScene(scene);
 		primaryStage.show();
-		Alert alert = new Alert(AlertType.INFORMATION);
-		alert = new Alert(AlertType.INFORMATION);
-
-		alert.setResizable(true);
-
-		alert.setTitle("Information Dialog");
-
-		alert.setHeaderText(null);
-
-		alert.setContentText("trying to hide " + "Pivot5");
-		alert.showAndWait();
-		chart.hideSerie("Pivot5");
-
-		alert = new Alert(AlertType.INFORMATION);
-
-		alert.setResizable(true);
-
-		alert.setTitle("Information Dialog");
-
-		alert.setHeaderText(null);
-		alert.setContentText("trying to reshow " + "Pivot5");
-		alert.showAndWait();
-		chart.reShow("Pivot5");
+		// Alert alert = new Alert(AlertType.INFORMATION);
+		// alert = new Alert(AlertType.INFORMATION);
+		//
+		// alert.setResizable(true);
+		//
+		// alert.setTitle("Information Dialog");
+		//
+		// alert.setHeaderText(null);
+		//
+		// alert.setContentText("trying to hide " + "Pivot5");
+		// alert.showAndWait();
+		// chart.hideSerie("Pivot5");
+		//
+		// alert = new Alert(AlertType.INFORMATION);
+		//
+		// alert.setResizable(true);
+		//
+		// alert.setTitle("Information Dialog");
+		//
+		// alert.setHeaderText(null);
+		// alert.setContentText("trying to reshow " + "Pivot5");
+		// alert.showAndWait();
+		// chart.reShow("Pivot5");
 	}
 
 	/**
@@ -142,7 +146,7 @@ public class ZoomableLineChartsMultiYAxisMainXDate extends Application {
 		XYChart.Series<Number, Number> series = new XYChart.Series<>();
 		series.setName(name);
 		for (Long i = 0L; i <= X_DATA_COUNT; i += 100) {
-			series.getData().add(new XYChart.Data<>(1000 * i, function.apply(i)));
+			series.getData().add(new XYChart.Data<>(100 * i, function.apply(i)));
 		}
 		return series;
 	}
@@ -163,7 +167,7 @@ public class ZoomableLineChartsMultiYAxisMainXDate extends Application {
 		XYChart.Series<Number, Number> series = new XYChart.Series<>();
 		series.setName(name);
 		for (Long i = 0L; i < X_DATA_COUNT; i += 100) {
-			series.getData().add(new XYChart.Data<>(decalXAxis + 1000 * i, function.apply(i)));
+			series.getData().add(new XYChart.Data<>(decalXAxis + 100 * i, function.apply(i)));
 		}
 		return series;
 	}

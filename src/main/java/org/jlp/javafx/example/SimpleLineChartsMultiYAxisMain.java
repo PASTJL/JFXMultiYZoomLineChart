@@ -39,6 +39,12 @@ public class SimpleLineChartsMultiYAxisMain extends Application {
 	/** The Constant X_DATA_COUNT. */
 	public static final int X_DATA_COUNT = 3600;
 
+	/**
+	 * Start.
+	 *
+	 * @param primaryStage the primary stage
+	 * @throws Exception the exception
+	 */
 	/*
 	 * (non-Javadoc)
 	 * 

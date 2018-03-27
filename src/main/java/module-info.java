@@ -14,20 +14,17 @@
  * the License.
  *
  */
-module org.jlp.javafx {
-	requires javafx.base;
-
-	requires transitive javafx.graphics;
-	requires javafx.controls;
-	requires java.base;
-
-	// for scenic View
-	requires javafx.web;
-	requires javafx.fxml;
-	requires jdk.attach;
-
+open module org.jlp.javafx {
 	exports org.jlp.javafx;
 	exports org.jlp.javafx.example;
+	exports org.jlp.javafx.richview;
+	exports org.jlp.javafx.datas;
+	exports org.jlp.javafx.common;
 	exports org.jlp.javafx.ext;
 
+	requires transitive javafx.base;
+	requires transitive javafx.controls;
+	requires transitive javafx.graphics;
+	requires java.base;
+	requires java.desktop;
 }

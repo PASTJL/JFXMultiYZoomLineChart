@@ -45,6 +45,12 @@ public class SimpleLineChartsMultiYAxisMainXDate extends Application {
 	/** The Constant NB_MAJOR_TICK_MAK. */
 	private static final int NB_MAJOR_TICK_MAK = 10;
 
+	/**
+	 * Start.
+	 *
+	 * @param primaryStage the primary stage
+	 * @throws Exception the exception
+	 */
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -83,7 +89,7 @@ public class SimpleLineChartsMultiYAxisMainXDate extends Application {
 		chart.addSeries(prepareSeries("Pivot2Bis", (x) -> (double) -1.5d * x * Math.sqrt(x)), Color.RED, "toDestroy");
 		chart.addSeries(prepareSeries("Pivot3", (x) -> (double) -1.5 * x), Color.BLUE, "Units");
 		chart.addSeries(prepareSeries("Pivot4", (x) -> ((double) 2 * x), 0L), Color.GREEN, "Octets");
-		chart.addSeries(prepareInverseSeries("Pivot5", (x) -> ((double) (x + 100) * (x - 200)), 0L), Color.RED,
+		chart.addSeries(prepareInverseSeries("Pivot5", (x) -> ((double) (x + 100) * (x - 200)), 0L), Color.DARKORANGE,
 				"toDestroy");
 
 		primaryStage.setTitle("MultipleAxesLineChart");

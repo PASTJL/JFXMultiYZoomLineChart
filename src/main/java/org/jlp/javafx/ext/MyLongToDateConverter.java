@@ -51,6 +51,12 @@ public class MyLongToDateConverter extends StringConverter<Number> {
 	/** The cal. */
 	private Calendar cal;
 	
+	/**
+	 * From string.
+	 *
+	 * @param date the date
+	 * @return the number
+	 */
 	/* (non-Javadoc)
 	 * @see javafx.util.StringConverter#fromString(java.lang.String)
 	 */
@@ -81,6 +87,12 @@ public class MyLongToDateConverter extends StringConverter<Number> {
 		 cal=Calendar.getInstance();
 	}
 
+	/**
+	 * To string.
+	 *
+	 * @param time the time
+	 * @return the string
+	 */
 	/* (non-Javadoc)
 	 * @see javafx.util.StringConverter#toString(java.lang.Object)
 	 */

@@ -16,14 +16,17 @@
 */
 package org.jlp.javafx;
 
+import java.awt.Toolkit;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.jlp.javafx.common.NearEvent;
 import org.jlp.javafx.ext.MyLongToDateConverter;
 import org.jlp.javafx.ext.MyYaxisDoubleFormatter;
 
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -37,10 +40,12 @@ import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -69,7 +74,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	/** The is rebuild base chart. */
 	private boolean isRebuildBaseChart = false;
 	/** The hm hmVisibleSeries series. */
-	protected Map<String, TupleBoolLC> hmVisibleSeries = new HashMap<String, TupleBoolLC>();
+	public Map<String, TupleBoolLC> hmVisibleSeries = new HashMap<String, TupleBoolLC>();
 
 	/** The hm X sorted series. */
 	public Map<String, Series<Number, Number>> hmXSortedSeries = new HashMap<String, Series<Number, Number>>();
@@ -84,6 +89,9 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	public static int nbYTicks = 20;
 	/** The base chart. */
 	public LineChart<Number, Number> baseChart;
+
+	/** The nb Y axis. */
+	public int nbYAxis = 0;
 
 	/**
 	 * Getter for the main BaseChart of the StackPane.
@@ -123,8 +131,14 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		return backgroundCharts;
 	}
 
-	/** The chart color map. */
-	protected final Map<LineChart<Number, Number>, Color> chartColorMap = new HashMap<LineChart<Number, Number>, Color>();
+	/**
+	 * The chart color map. Key is the name of the series.
+	 * <p>
+	 * This name must be unique
+	 * </p>
+	 * .
+	 */
+	public final Map<String, Color> chartColorMap = new HashMap<String, Color>();
 
 	/**
 	 * The Constant hmBoldAxis a hashMap with keys are LineChart and value a boolean
@@ -139,13 +153,13 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	private final double yAxisSeparation = 20;
 
 	/** The stroke width of the lineChart . */
-	private double strokeWidth = 0.2;
+	private double strokeWidth = 1.0;
 
 	/**
 	 * The details window. Shows or not the values X/Y of series, bound with
 	 * isPopupVisible
 	 */
-	private final AnchorPane detailsWindow;
+	private AnchorPane detailsWindow = null;;
 
 	/**
 	 * Instantiates a new simple line charts multi Y axis.
@@ -184,8 +198,11 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		backgroundCharts.clear();
 		backgroundCharts.addListener((Observable observable) -> {
 
-			if (!isClearing)// System.out.println("an event occurs in backgroundCharts");
+			if (!isClearing)//
+			{
+
 				rebuildChart();
+			}
 		});
 
 		detailsWindow = new AnchorPane();
@@ -196,6 +213,46 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 
 		normalizeBaseChartBound();
 		rebuildChart();
+		this.setMaxWidth(Toolkit.getDefaultToolkit().getScreenSize().getWidth());
+
+	}
+
+	/**
+	 * Sets the selected.
+	 *
+	 * @param nameSerie
+	 *            the name serie
+	 * @param selected
+	 *            the selected
+	 */
+	public void setSelected(String nameSerie, Boolean selected) {
+		TupleBoolLC tup = this.hmVisibleSeries.get(nameSerie);
+		if (null == tup)
+			return;
+		tup.isSelected = selected;
+		hmVisibleSeries.put(nameSerie, tup);
+		// find NameSeries
+		int idx = 0;
+		for (Series<Number, Number> series : tup.lineChart.getData()) {
+			if (series.getName().equals(nameSerie))
+				break;
+			idx++;
+		}
+		String oldStyle = "";
+
+		if (idx < tup.lineChart.getData().size())
+			oldStyle = tup.lineChart.getData().get(idx).getNode().getStyle();
+		String newStyleString = "";
+		if (selected) {
+			newStyleString = newStyle(oldStyle, "-fx-stroke-width: 3px", "-fx-stroke-width:\\*\\d+(px|\\.?\\d+?)");
+		} else {
+			newStyleString = newStyle(oldStyle, "-fx-stroke-width: 1px", "-fx-stroke-width:\\*\\d+(px|\\.?\\d+?)");
+		}
+
+		tup.lineChart.getData().get(idx).getNode().setStyle(newStyleString);
+		// styleChartLine(baseChart,
+		// chartColorMap.getOrDefault(tup.lineChart.getData().get(idx).getName(),
+		// Color.BLACK));
 
 	}
 
@@ -271,7 +328,8 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				lineSymbol.setStyle(
 						// lineSymbol.getStyle() +
 						"\n -fx-background-insets: 0, 2;\n" + "   \n" + "     -fx-background-color: "
-								+ toRGBCode(lineColor) + " #000000; -fx-padding: 3px;");
+								+ toRGBCode(this.chartColorMap.getOrDefault(series.getName(), lineColor))
+								+ "; -fx-padding: 2px;");
 			}
 
 		}
@@ -288,6 +346,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		baseChart.setCreateSymbols(true);
 		baseChart.setLegendVisible(false);
 		baseChart.getXAxis().setAutoRanging(false);
+		baseChart.setAnimated(false);
 		baseChart.getXAxis().setAnimated(false);
 		baseChart.getYAxis().setAnimated(false);
 
@@ -310,7 +369,8 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		if (null == line) {
 			System.out.println(" line is null");
 		} else
-			line.setStyle("-fx-stroke: " + toRGBCode(lineColor) + "; -fx-stroke-width: " + strokeWidth + ";");
+			line.setStyle("-fx-stroke: " + toRGBCode(this.chartColorMap.getOrDefault(series.getName(), lineColor))
+					+ "; -fx-stroke-width: " + strokeWidth + ";");
 	}
 
 	/**
@@ -326,7 +386,8 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		for (XYChart.Series<Number, Number> series : list) {
 			Node line = series.getNode().lookup(".chart-series-line");
 
-			line.setStyle("-fx-stroke: " + toRGBCode(lineColor) + "; -fx-stroke-width: " + strokeWidth + ";");
+			line.setStyle("-fx-stroke: " + toRGBCode(this.chartColorMap.getOrDefault(series.getName(), lineColor))
+					+ "; -fx-stroke-width: " + strokeWidth + ";");
 
 		}
 
@@ -341,6 +402,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	 *            the line color
 	 */
 	private final void styleChartLine(LineChart<Number, Number> chart, Color lineColor) {
+
 		chart.getYAxis().lookup(".axis-label")
 				.setStyle("-fx-text-fill: " + toRGBCode(lineColor) + "; -fx-font-weight: bold;");
 
@@ -397,6 +459,63 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		}
 
 		getChildren().add(detailsWindow);
+
+	}
+
+	/**
+	 * Rebuild chart.
+	 *
+	 * @param minX
+	 *            the min X
+	 * @param maxX
+	 *            the max X
+	 */
+	protected final void rebuildChart(Number minX, Number maxX) {
+		getChildren().clear();
+
+		getChildren().add(resizeBaseChart(minX, maxX));
+
+		for (TupleStrLC tuple : backgroundCharts) {
+
+			getChildren().add(resizeBackgroundChart(tuple, minX, maxX));
+		}
+
+		getChildren().add(detailsWindow);
+
+	}
+
+	/**
+	 * Resize baseChart.
+	 *
+	 * @param minX
+	 *            the min X
+	 * @param maxX
+	 *            the max X
+	 * @return the node
+	 */
+	private final Node resizeBaseChart(Number minX, Number maxX) {
+		HBox hBox = new HBox(baseChart);
+		hBox.setAlignment(Pos.CENTER_LEFT);
+		hBox.prefHeightProperty().bind(heightProperty());
+		hBox.prefWidthProperty().bind(widthProperty());
+
+		((NumberAxis) baseChart.getXAxis()).setUpperBound(maxX.doubleValue());
+		((NumberAxis) baseChart.getXAxis()).setLowerBound(minX.doubleValue());
+		baseChart.minWidthProperty()
+				.bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+		baseChart.prefWidthProperty()
+				.bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+		baseChart.maxWidthProperty()
+				.bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+		// styleSymbol(baseChart,
+		// chartColorMap.get(baseChart.getData().get(0).getName()));
+		((NumberAxis) baseChart.getXAxis()).setAutoRanging(false);
+		((NumberAxis) baseChart.getXAxis()).setTickUnit(maxX.doubleValue() - minX.doubleValue() / nbXTicks);
+		((NumberAxis) baseChart.getYAxis()).setTickUnit((((NumberAxis) baseChart.getYAxis()).getUpperBound()
+				- ((NumberAxis) baseChart.getYAxis()).getLowerBound()) / nbYTicks);
+		// styleSymbol(lineChart,
+		// chartColorMap.get(lineChart.getData().get(0).getName()));
+		return baseChart;
 	}
 
 	/**
@@ -418,14 +537,50 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				.bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
 		lineChart.maxWidthProperty()
 				.bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
-		styleSymbol(baseChart, chartColorMap.get(baseChart));
+		// styleSymbol(baseChart,
+		// chartColorMap.get(baseChart.getData().get(0).getName()));
 		((NumberAxis) baseChart.getXAxis()).setAutoRanging(false);
 		((NumberAxis) baseChart.getXAxis()).setTickUnit((((NumberAxis) baseChart.getXAxis()).getUpperBound()
 				- ((NumberAxis) baseChart.getXAxis()).getLowerBound()) / nbXTicks);
 		((NumberAxis) baseChart.getYAxis()).setTickUnit((((NumberAxis) baseChart.getYAxis()).getUpperBound()
 				- ((NumberAxis) baseChart.getYAxis()).getLowerBound()) / nbYTicks);
-		styleSymbol(lineChart, chartColorMap.get(lineChart));
+		// styleSymbol(lineChart,
+		// chartColorMap.get(lineChart.getData().get(0).getName()));
 		return lineChart;
+	}
+
+	/**
+	 * Resize background chart.
+	 *
+	 * @param tuple
+	 *            the tuple
+	 * @param minX
+	 *            the min X
+	 * @param maxX
+	 *            the max X
+	 * @return the node
+	 */
+	private final Node resizeBackgroundChart(TupleStrLC tuple, Number minX, Number maxX) {
+		HBox hBox = new HBox(tuple.lineChart);
+		hBox.setAlignment(Pos.CENTER_LEFT);
+		hBox.prefHeightProperty().bind(heightProperty());
+		hBox.prefWidthProperty().bind(widthProperty());
+		hBox.setMouseTransparent(true);
+		tuple.lineChart.getYAxis().setSide(Side.RIGHT);
+		tuple.lineChart.minWidthProperty()
+				.bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+		tuple.lineChart.prefWidthProperty()
+				.bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+		tuple.lineChart.maxWidthProperty()
+				.bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+
+		tuple.lineChart.translateXProperty().bind(baseChart.getYAxis().widthProperty());
+		tuple.lineChart.getYAxis().setTranslateX((yAxisWidth + yAxisSeparation) * backgroundCharts.indexOf(tuple));
+
+		// styleSymbol(tuple.lineChart,
+		// chartColorMap.get(tuple.lineChart.getData().get(0).getName()));
+
+		return hBox;
 	}
 
 	/**
@@ -436,6 +591,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	 * @return the node
 	 */
 	private final Node resizeBackgroundChart(TupleStrLC tuple) {
+		tuple.lineChart.getYAxis().setSide(Side.RIGHT);
 		HBox hBox = new HBox(tuple.lineChart);
 		hBox.setAlignment(Pos.CENTER_LEFT);
 		hBox.prefHeightProperty().bind(heightProperty());
@@ -452,9 +608,36 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		tuple.lineChart.translateXProperty().bind(baseChart.getYAxis().widthProperty());
 		tuple.lineChart.getYAxis().setTranslateX((yAxisWidth + yAxisSeparation) * backgroundCharts.indexOf(tuple));
 
-		styleSymbol(tuple.lineChart, chartColorMap.get(tuple.lineChart));
+		// styleSymbol(tuple.lineChart,
+		// chartColorMap.get(tuple.lineChart.getData().get(0).getName()));
 
 		return hBox;
+	}
+
+	/** The x line. */
+	final public Line xLine = new Line();
+
+	/** The y line. */
+	final public Line yLine = new Line();
+
+	/**
+	 * Unbind mouse events.
+	 */
+	public final void unbindMouseEvents() {
+		setOnMouseMoved(null);
+		final Node chartBackground = baseChart.lookup(".chart-plot-background");
+		chartBackground.setOnMouseEntered(null);
+		chartBackground.setOnMouseExited(null);
+		chartBackground.setOnMouseMoved(null);
+		xLine.setVisible(false);
+		yLine.setVisible(false);
+	}
+
+	/**
+	 * Bind mouse events.
+	 */
+	public final void bindMouseEvents() {
+		bindMouseEvents(baseChart, strokeWidth);
 	}
 
 	/**
@@ -477,8 +660,8 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		final Axis<Number> xAxis = baseChart.getXAxis();
 		final Axis<Number> yAxis = baseChart.getYAxis();
 
-		final Line xLine = new Line();
-		final Line yLine = new Line();
+		// final Line xLine = new Line();
+		// final Line yLine = new Line();
 		yLine.setFill(Color.GRAY);
 		xLine.setFill(Color.GRAY);
 		yLine.setStrokeWidth(strokeWidth / 2);
@@ -492,52 +675,77 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				n.setMouseTransparent(true);
 			}
 		}
+
 		chartBackground.setCursor(Cursor.CROSSHAIR);
 		chartBackground.setOnMouseEntered((event) -> {
-			chartBackground.getOnMouseMoved().handle(event);
-			detailsPopup.setVisible(true);
-			xLine.setVisible(true);
-			yLine.setVisible(true);
-			detailsWindow.getChildren().addAll(xLine, yLine);
+			if (event.isPrimaryButtonDown()) {
 
+			} else {
+				/* Zooming or Drag/drop a file */
+				chartBackground.getOnMouseMoved().handle(event);
+				detailsPopup.setVisible(true);
+				xLine.setVisible(true);
+				yLine.setVisible(true);
+				if (!detailsWindow.getChildren().contains(xLine)) {
+					detailsWindow.getChildren().addAll(xLine, yLine);
+				}
+
+			}
+			event.consume();
 		});
 		chartBackground.setOnMouseExited((event) -> {
+
 			detailsPopup.setVisible(false);
 			xLine.setVisible(false);
 			yLine.setVisible(false);
+
 			detailsWindow.getChildren().removeAll(xLine, yLine);
+
 		});
 		chartBackground.setOnMouseMoved(event -> {
+			if (event.isPrimaryButtonDown() || event.isSecondaryButtonDown()) {
 
-			// set hmBoldAxis to false
-			for (Entry<LineChart<Number, Number>, Boolean> entry : hmBoldAxis.entrySet()) {
-				hmBoldAxis.put(entry.getKey(), false);
-			}
-			double x = event.getX() + chartBackground.getLayoutX();
-			double y = event.getY() + chartBackground.getLayoutY();
-
-			xLine.setStartX(10);
-			xLine.setEndX(detailsWindow.getWidth() - 10);
-			xLine.setStartY(y + 5);
-			xLine.setEndY(y + 5);
-
-			yLine.setStartX(x + 5);
-			yLine.setEndX(x + 5);
-			yLine.setStartY(10);
-			yLine.setEndY(detailsWindow.getHeight() - 10);
-			detailsPopup.showChartDescriptionBySeries(event);
-			if (y + detailsPopup.getHeight() + 10 < getHeight()) {
-				AnchorPane.setTopAnchor(detailsPopup, y + 10);
+				event.consume();
 			} else {
-				AnchorPane.setTopAnchor(detailsPopup, y - 10 - detailsPopup.getHeight());
-			}
+				Long deb = System.currentTimeMillis();
+				double x = event.getX() + chartBackground.getLayoutX();
+				double y = event.getY() + chartBackground.getLayoutY();
+				// set hmBoldAxis to false
+				for (Entry<LineChart<Number, Number>, Boolean> entry : hmBoldAxis.entrySet()) {
+					hmBoldAxis.put(entry.getKey(), false);
+				}
 
-			if (x + detailsPopup.getWidth() + 10 < getWidth()) {
-				AnchorPane.setLeftAnchor(detailsPopup, x + 10);
-			} else {
-				AnchorPane.setLeftAnchor(detailsPopup, x - 10 - detailsPopup.getWidth());
+				xLine.setStartX(10);
+
+				xLine.setEndX(detailsWindow.getWidth() - 10);
+
+				xLine.setStartY(y + 5);
+				xLine.setEndY(y + 5);
+
+				yLine.setStartX(x + 5);
+				yLine.setEndX(x + 5);
+				yLine.setStartY(10);
+
+				yLine.setEndY(detailsWindow.getHeight() - 10);
+
+				detailsPopup.showChartDescriptionBySeries(event);
+				if (y + detailsPopup.getHeight() + 10 < getHeight()) {
+					AnchorPane.setTopAnchor(detailsPopup, y + 10);
+				} else {
+					AnchorPane.setTopAnchor(detailsPopup, y - 10 - detailsPopup.getHeight());
+				}
+
+				if (x + detailsPopup.getWidth() + 10 < getWidth()) {
+					AnchorPane.setLeftAnchor(detailsPopup, x + 10);
+				} else {
+					AnchorPane.setLeftAnchor(detailsPopup, x - 10 - detailsPopup.getWidth());
+				}
+				// System.out.println("duration on Mouse Move = " + (System.currentTimeMillis()
+				// - deb));
 			}
+			event.consume();
 		});
+
 	}
 
 	/**
@@ -576,35 +784,42 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		tupBoolLC.isVisible = true;
 		this.hmVisibleSeries.put(nameSerie, tupBoolLC);
 		this.isReShowingSerie = true;
-		Color col = this.chartColorMap.get(tupBoolLC.lineChart);
+		Color col = Color.BLACK;
+		// if (!tupBoolLC.lineChart.getData().isEmpty()) {
+		col = this.chartColorMap.getOrDefault(nameSerie, Color.BLACK);
+		// }
 
 		Series<Number, Number> serie = this.hmXSortedSeries.get(nameSerie);
-		if (tupBoolLC.lineChart == baseChart) {
-			tupBoolLC.lineChart.getYAxis().setSide(Side.LEFT);
-
-		} else {
-			tupBoolLC.lineChart.getYAxis().setSide(Side.RIGHT);
-			tupBoolLC.lineChart.getYAxis().setTickLabelGap(0);
-		}
 
 		setXLabel("      ");
-		int idx = retrieveLineChartInbackgroundCharts(tupBoolLC.lineChart);
-
-		if (idx >= 0) {
-
-			this.backgroundCharts.remove(idx);
-		}
-
-		tupBoolLC.lineChart.setAnimated(true);
+		String unit = tupBoolLC.lineChart.getYAxis().getLabel();
 
 		serie.setName(nameSerie);
-		LineChart<Number, Number> retLC = this.addSeries(serie, col, tupBoolLC.lineChart.getYAxis().getLabel());
-		this.isReShowingSerie = false;
-		retLC.setCreateSymbols(true);
 
-		retLC.setAnimated(true);
+		// System.out
+		// .println("Before adding series nb Series= " +
+		// tupBoolLC.lineChart.getData().size() + " unit=" + unit);
+		for (Series<Number, Number> serieBis : tupBoolLC.lineChart.getData()) {
+			if (serieBis.getName().equals(nameSerie)) {
+				tupBoolLC.lineChart.getData().remove(serieBis);
+				break;
+			}
+		}
+
+		LineChart<Number, Number> rtLC = addSeries(serie, col, unit);
+
+		this.hmVisibleSeries.put(nameSerie, new TupleBoolLC(true, tupBoolLC.isSelected, rtLC, tupBoolLC.translation));
+		// this.hmVisibleSeries.put(nameSerie, tupBoolLC);
+		// System.out.println(
+		// "After adding series nb Series= " +
+		// this.hmVisibleSeries.get(nameSerie).lineChart.getData().size());
+		rtLC.setAnimated(false);
+
+		this.isReShowingSerie = false;
+		rtLC.setCreateSymbols(true);
+
 		if (baseChart.getXAxis().getLabel() != null)
-			retLC.getXAxis().setLabel("    ");
+			rtLC.getXAxis().setLabel("    ");
 
 	}
 
@@ -628,19 +843,23 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 					dblMaxBoundX = serie.getData().get(serie.getData().size() - 1).getXValue().doubleValue();
 				}
 			} else {
-				// bug
-				System.out.println("tupBoolStr not retrieved");
+
+				if (null == tupBoolStr)
+					System.out.println("tupBoolStr not retrieved");
 			}
 		}
-		((NumberAxis) baseChart.getXAxis()).setLowerBound(dblLowBoundX);
-		((NumberAxis) baseChart.getXAxis()).setUpperBound(dblMaxBoundX);
+		Double marge = (dblMaxBoundX - dblLowBoundX) / 20;
+		((NumberAxis) baseChart.getXAxis())
+				.setLowerBound(Math.min(((NumberAxis) baseChart.getXAxis()).getLowerBound(), dblLowBoundX - marge));
+		((NumberAxis) baseChart.getXAxis())
+				.setUpperBound(Math.max(((NumberAxis) baseChart.getXAxis()).getUpperBound(), dblMaxBoundX + marge));
 	}
-	
+
 	/**
 	 * Reset.
 	 */
 	public void reset() {
-		for(Entry<String, TupleBoolLC>  entry:this.hmVisibleSeries.entrySet()) {
+		for (Entry<String, TupleBoolLC> entry : this.hmVisibleSeries.entrySet()) {
 			if (!entry.getValue().isVisible) {
 				this.reShow(entry.getKey());
 			}
@@ -662,7 +881,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		//
 		this.backgroundCharts.clear();
 		this.chartColorMap.clear();
-		
+
 		// recreating baseChart
 		NumberAxis xAxis = new NumberAxis();
 		NumberAxis yAxis = new NumberAxis();
@@ -672,7 +891,6 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 
 		setFixedAxisWidth(baseChart);
 		setAlignment(Pos.CENTER_LEFT);
-		
 
 		detailsWindow.getChildren().clear();
 		getChildren().add(detailsWindow);
@@ -701,45 +919,52 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		int idx = retrieveSeriesByName(nameSeries, lc);
 
 		if (idx >= 0) {
+			// System.out.println(
+			// "Hiding :Series :" + nameSeries + " with idx =" + idx + "/" +
+			// tupBoolLC.lineChart.getData().size());
 
-			tupBoolLC.lineChart.getData().remove(idx);
-			tupBoolLC.isVisible = false;
-			this.hmVisibleSeries.put(nameSeries, tupBoolLC);
+			lc.getData().remove(idx);
+
+			TupleBoolLC tupBoolLCBis = new TupleBoolLC(false, tupBoolLC.isSelected, lc, tupBoolLC.translation);
+
+			this.hmVisibleSeries.put(nameSeries, tupBoolLCBis);
 
 			/* If it is the only series, remove also the LineChart from the StackPane */
-			if (tupBoolLC.lineChart.getData().isEmpty()) {
+			if (lc.getData().isEmpty()) {
 				if (lc != baseChart) {
 					// System.out.println("removing linechart in backgroundCharts");
 					int idx2 = retrieveLineChartInbackgroundCharts(lc);
+					// System.out.println("removed linechart -> idx2=" + idx2 + " ; nameSerie=" +
+					// nameSeries);
+					if (idx2 >= 0) {
+						TupleStrLC tup2 = this.backgroundCharts.remove(idx2);
 
-					TupleStrLC tup2 = this.backgroundCharts.remove(idx2);
-					// System.out.println("removed linechart -> " +
-					// tup2.lineChart.getYAxis().getLabel());
-
-				} else {
-					// the first Line Chart of this.backgroundCharts becomes the baseChart
-					isRebuildBaseChart = true;
-					NumberAxis xAxis = (NumberAxis) baseChart.getXAxis();
-
-					baseChart = new LineChart<Number, Number>(xAxis, this.backgroundCharts.get(0).lineChart.getYAxis());
-					// baseChart = tup1.lineChart;
-					baseChart.getYAxis().setSide(Side.LEFT);
-					for (Series<Number, Number> series : this.backgroundCharts.get(0).lineChart.getData()) {
-						this.addSeries(series, chartColorMap.get(this.backgroundCharts.get(0).lineChart),
-								baseChart.getYAxis().getLabel());
+						// System.out.println("removed linechart -> " +
+						// tup2.lineChart.getYAxis().getLabel());
 					}
-					this.backgroundCharts.remove(0);
-					isRebuildBaseChart = false;
-
-					baseChart.setId("baseChart");
-					bindMouseEvents(baseChart, this.strokeWidth);
-
 				}
 
 			}
 
 		}
 		reboundBasechartXAxis();
+	}
+
+	/**
+	 * Del serie.
+	 *
+	 * @param nameSerie
+	 *            the name serie
+	 */
+	public void delSerie(String nameSerie) {
+		TupleBoolLC tupBoolLC = this.hmVisibleSeries.get(nameSerie);
+		/* First hideSeries a lot of work is done */
+		hideSerie(nameSerie);
+		this.hmVisibleSeries.remove(nameSerie);
+		this.hmXSortedSeries.remove(nameSerie);
+		this.hmYSortedSeries.remove(nameSerie);
+		this.chartColorMap.remove(nameSerie);
+
 	}
 
 	/**
@@ -760,7 +985,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		}
 
 		return -1;
-		
+
 	}
 
 	/**
@@ -777,6 +1002,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	public final LineChart<Number, Number> addSeries(XYChart.Series<Number, Number> series, Color lineColor,
 			String unit) {
 
+		// long deb1 = System.currentTimeMillis();
 		// create chart
 		// Search first if a LineChar with the same unit exists
 		// try with the baseChart
@@ -784,7 +1010,13 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		NumberAxis yAxis = new NumberAxis();
 		LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
 		;
-		// testing if there is a seies in the baseChart :
+		// testing if there is a series in the baseChart :
+		// Series<Number, Number> serie1 = new Series<Number, Number>();
+		if (series.getData().isEmpty()) {
+			System.out.println("the series " + series.getName() + " is empty");
+			return lineChart;
+		}
+
 		if (!this.hmXSortedSeries.containsKey(series.getName())) {
 			Series<Number, Number> serie1 = new Series<Number, Number>();
 			serie1.setName(series.getName());
@@ -792,6 +1024,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 			hmXSortedSeries.put(series.getName(), serie1);
 			Series<Number, Number> serie2 = new Series<Number, Number>();
 			serie2.setName(series.getName());
+
 			serie2.setData(series.getData().sorted(Comparator.comparingDouble(d -> d.getYValue().doubleValue())));
 			hmYSortedSeries.put(series.getName(), serie2);
 
@@ -809,7 +1042,11 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				return null;
 			}
 		}
-
+		if (!this.isReShowingSerie) {
+			this.chartColorMap.put(series.getName(), lineColor);
+		}
+		// long deb2 = System.currentTimeMillis();
+		// System.out.println("indx1 sorting series duration =" + (deb2 - deb1));
 		DoubleProperty minSeries = new SimpleDoubleProperty();
 		minSeries.setValue(hmXSortedSeries.get(series.getName()).getData().get(0).getXValue());
 		DoubleProperty maxSeries = new SimpleDoubleProperty();
@@ -824,20 +1061,30 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		DoubleProperty maxYSeries = new SimpleDoubleProperty();
 		maxYSeries
 				.setValue(hmYSortedSeries.get(series.getName()).getData().get(series.getData().size() - 1).getYValue());
-		if (baseChart.getData().isEmpty()) {
-			 System.out.println("Init baseChart with serie :" + series.getName());
+		// Long deb3 = System.currentTimeMillis();
+		if (baseChart.getData().isEmpty()
+				&& (null == baseChart.getYAxis().getLabel() || unit.equals(baseChart.getYAxis().getLabel()))) {
+			// System.out.println("Init baseChart with serie :" + series.getName());
 
 			lineChart = baseChart;
 			lineChart.getYAxis().setLabel(unit);
-			chartColorMap.put(lineChart, lineColor);
-			 styleBaseChart(lineChart);
+
+			styleBaseChart(lineChart);
 			styleBaseChartLine(lineColor);
 			styleSymbol(lineChart, lineColor);
-
+			// Modif 1 Première serie
+			Double marge = (maxSeries.get() - minSeries.get()) / 20;
+			minSeries.set(minSeries.get() - marge);
+			maxSeries.set(maxSeries.get() + marge);
+			((NumberAxis) baseChart.getXAxis()).lowerBoundProperty().bindBidirectional(minSeries);
+			((NumberAxis) baseChart.getXAxis()).upperBoundProperty().bindBidirectional(maxSeries);
+			// Long deb4 = System.currentTimeMillis();
+			// System.out.println("indx2 basechart empty duaration =" + (deb4 - deb3));
 		} else {
 
 			if (unit.equals(baseChart.getYAxis().getLabel())) {
 				lineChart = baseChart;
+
 				if (((NumberAxis) baseChart.getXAxis()).lowerBoundProperty().getValue().doubleValue() > minSeries
 						.doubleValue()) {
 
@@ -850,10 +1097,16 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 					((NumberAxis) baseChart.getXAxis()).upperBoundProperty().bindBidirectional(maxSeries);
 
 				}
+				Double marge = (maxSeries.get() - minSeries.get()) / 20;
+				minSeries.set(minSeries.get() - marge);
+				maxSeries.set(maxSeries.get() + marge);
+				((NumberAxis) baseChart.getXAxis()).lowerBoundProperty().bindBidirectional(minSeries);
+				((NumberAxis) baseChart.getXAxis()).upperBoundProperty().bindBidirectional(maxSeries);
 				styleBaseChart(lineChart);
 				styleBaseChartLine(lineColor);
 				styleSymbol(lineChart, lineColor);
-
+				// Long deb5 = System.currentTimeMillis();
+				// System.out.println("indx2 basechart existing duaration =" + (deb5 - deb3));
 			} else {
 				for (TupleStrLC tuple : this.backgroundCharts) {
 					if (unit.equals(tuple.unit)) {
@@ -863,12 +1116,14 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				}
 			}
 			if (null == lineChart.getYAxis().getLabel()) {
+				// Long deb6 = System.currentTimeMillis();
 
 				yAxis.setAutoRanging(true);
 				// style x-axis
 				xAxis.setAutoRanging(false);
 				xAxis.setVisible(false);
 				xAxis.setOpacity(0.0); // somehow the upper setVisible does not work
+				nbYAxis++;
 
 				if (((NumberAxis) baseChart.getXAxis()).lowerBoundProperty().getValue().doubleValue() >= minSeries
 						.doubleValue()) {
@@ -882,9 +1137,21 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 					((NumberAxis) baseChart.getXAxis()).upperBoundProperty().bindBidirectional(maxSeries);
 
 				}
+				Double marge = (maxSeries.get() - minSeries.get()) / 20;
+				minSeries.set(minSeries.get() - marge);
+				maxSeries.set(maxSeries.get() + marge);
+				// ((NumberAxis)
+				// baseChart.getXAxis()).lowerBoundProperty().bindBidirectional(minSeries);
+				// ((NumberAxis)
+				// baseChart.getXAxis()).upperBoundProperty().bindBidirectional(maxSeries);
 
+				((NumberAxis) baseChart.getXAxis()).setLowerBound(
+						Math.min(((NumberAxis) baseChart.getXAxis()).getLowerBound() - marge, minSeries.get() - marge));
+				((NumberAxis) baseChart.getXAxis()).setUpperBound(
+						Math.max(((NumberAxis) baseChart.getXAxis()).getUpperBound() + marge, maxSeries.get() + marge));
 				xAxis.lowerBoundProperty().bindBidirectional(((NumberAxis) baseChart.getXAxis()).lowerBoundProperty());
 				xAxis.upperBoundProperty().bindBidirectional(((NumberAxis) baseChart.getXAxis()).upperBoundProperty());
+
 				//
 
 				// xAxis.tickUnitProperty().bind(((NumberAxis)
@@ -893,7 +1160,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				yAxis.setSide(Side.RIGHT);
 				yAxis.setLabel(unit);
 				lineChart = new LineChart<Number, Number>(xAxis, yAxis);
-				lineChart.setAnimated(true);
+				lineChart.setAnimated(false);
 				lineChart.setLegendVisible(false);
 
 				if (!SimpleLineChartsMultiYAxis.hmBoldAxis.containsKey(lineChart)) {
@@ -904,17 +1171,19 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 						- ((NumberAxis) lineChart.getXAxis()).getLowerBound()) / nbXTicks);
 				((NumberAxis) lineChart.getYAxis()).setTickUnit((((NumberAxis) lineChart.getYAxis()).getUpperBound()
 						- ((NumberAxis) lineChart.getYAxis()).getLowerBound()) / nbYTicks);
-				chartColorMap.put(lineChart, lineColor);
 
 				((NumberAxis) baseChart.getXAxis()).setTickUnit(
 						(xAxis.upperBoundProperty().doubleValue() - xAxis.lowerBoundProperty().doubleValue())
 								/ nbXTicks);
 
 				this.backgroundCharts.add(new TupleStrLC(unit, lineChart));
-
+				// Long deb7 = System.currentTimeMillis();
+				// System.out.println("indx3 other chart new duaration =" + (deb7 - deb6));
 			}
 		}
-		lineChart.getYAxis().setAutoRanging(true);
+		// Long deb8 = System.currentTimeMillis();
+
+		lineChart.getYAxis().setAutoRanging(false);
 
 		if (((NumberAxis) lineChart.getYAxis()).lowerBoundProperty().getValue().doubleValue() >= minYSeries
 				.doubleValue()) {
@@ -924,34 +1193,66 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 			((NumberAxis) lineChart.getYAxis()).setLowerBound(minYSeries.doubleValue());
 
 		}
+		minYSeries.setValue(((NumberAxis) lineChart.getYAxis()).getLowerBound());
 		if (((NumberAxis) lineChart.getYAxis()).upperBoundProperty().getValue().doubleValue() <= maxYSeries
 				.doubleValue()) {
 
 			((NumberAxis) lineChart.getYAxis()).setUpperBound(maxYSeries.doubleValue());
 		}
 
+		maxYSeries.setValue(((NumberAxis) lineChart.getYAxis()).getUpperBound());
+		Double marge = (maxYSeries.get() - minYSeries.get()) / 20;
+		minYSeries.set(minYSeries.get() - marge);
+		maxYSeries.set(maxYSeries.get() + marge);
+		((NumberAxis) lineChart.getYAxis()).lowerBoundProperty().bindBidirectional(minYSeries);
+		((NumberAxis) lineChart.getYAxis()).upperBoundProperty().bindBidirectional(maxYSeries);
+
 		((NumberAxis) lineChart.getYAxis()).setTickLabelFormatter(new MyYaxisDoubleFormatter());
 		((NumberAxis) lineChart.getXAxis()).setTickUnit((((NumberAxis) lineChart.getXAxis()).getUpperBound()
 				- ((NumberAxis) lineChart.getXAxis()).getLowerBound()) / nbXTicks);
 		((NumberAxis) lineChart.getYAxis()).setTickUnit((((NumberAxis) lineChart.getYAxis()).getUpperBound()
 				- ((NumberAxis) lineChart.getYAxis()).getLowerBound()) / nbYTicks);
-		lineChart.getData().add(series);
+		// Long deb9 = System.currentTimeMillis();
+		// System.out.println("indx4 avant addSeries duaration =" + (deb9 - deb8));
+		// lineChart.getData().add(series);
+		// Long deb10 = System.currentTimeMillis();
+		// System.out.println("indx5 apres addSeries duaration =" + (deb10 - deb9));
 		lineChart.getYAxis().setAutoRanging(false);
 
 		styleBackgroundChart(lineChart, lineColor);
-		styleSerieLine(lineChart, series, lineColor);
+		// styleSerieLine(lineChart, series, lineColor);
 		setFixedAxisWidth(lineChart);
-		styleSymbol(lineChart, lineColor);
+		// styleSymbol(lineChart, lineColor);
 
-		hmVisibleSeries.put(series.getName(), new TupleBoolLC(true, lineChart));
+		hmVisibleSeries.put(series.getName(), new TupleBoolLC(true, false, lineChart, 0.0));
 		// System.out.println("hmVisible -> " +
 		// hmVisibleSeries.get(series.getName()).lineChart.getYAxis().getLabel());
-		if (lineChart==baseChart) {
-			System.out.println("rebounding XAis");
-			reboundBasechartXAxis();
-			//rebuildChart();
-		}
-		return lineChart;
+		// Long deb11 = System.currentTimeMillis();
+		// System.out.println("indx6 un pe avant fin addSeries duaration =" + (deb11 -
+		// deb10));
+		final LineChart<Number, Number> lc = lineChart;
+
+		Platform.runLater(() -> {
+
+			lc.getData().add(series);
+			styleSerieLine(lc, series, lineColor);
+			styleSymbol(lc, lineColor);
+			if (lc == baseChart) {
+				// System.out.println("rebounding XAxis");
+				reboundBasechartXAxis();
+				// rebuildChart();
+			} else {
+				if (null != baseChart.getXAxis().getLabel() && baseChart.getXAxis().getLabel().length() > 0) {
+					lc.getXAxis().setLabel("                      ");
+				}
+			}
+
+		});
+
+		// Long deb12 = System.currentTimeMillis();
+		// System.out.println("indx7 fin addSeries duaration =" + (deb12 - deb11));
+		// return lineChart;
+		return lc;
 	}
 
 	/**
@@ -997,9 +1298,81 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	}
 
 	/**
+	 * New style.
+	 *
+	 * @param OldStyle
+	 *            the old style
+	 * @param addNewStyle
+	 *            the add new style
+	 * @param regextoReplace
+	 *            the regexto replace
+	 * @return the string
+	 */
+	private String newStyle(String OldStyle, String addNewStyle, String regextoReplace) {
+		StringBuilder strB = new StringBuilder();
+		String[] arrayOldStyle = OldStyle.split(";");
+
+		for (String frag : arrayOldStyle) {
+			if (frag.trim().matches(regextoReplace)) {
+				/* Skip the Value */
+
+			} else {
+
+				strB.append(frag).append(";");
+			}
+
+		}
+		/* Added only Once at the end */
+		strB.append(addNewStyle).append(";");
+
+		return strB.toString();
+
+	}
+
+	/**
+	 * Do a translation on XAxis.
+	 *
+	 * @param nameSeries
+	 *            the name series
+	 * @param translat
+	 *            the translat
+	 */
+	public void doTranlation(String nameSeries, double translat) {
+		/*
+		 * hashMap to update public Map<String, TupleBoolLC> hmVisibleSeries = new
+		 * HashMap<String, TupleBoolLC>();
+		 * 
+		 * 
+		 * public Map<String, Series<Number, Number>> hmXSortedSeries = new
+		 * HashMap<String, Series<Number, Number>>();
+		 * 
+		 * 
+		 * public Map<String, Series<Number, Number>> hmYSortedSeries = new
+		 * HashMap<String, Series<Number, Number>>();
+		 */
+		TupleBoolLC tup1 = hmVisibleSeries.get(nameSeries);
+
+		tup1.translation = tup1.translation + translat;
+
+		hmVisibleSeries.put(nameSeries, tup1);
+		Series<Number, Number> serie = hmXSortedSeries.get(nameSeries);
+
+		for (Data<Number, Number> data : serie.getData()) {
+			data.setXValue(data.getXValue().doubleValue() + translat);
+
+		}
+
+		hmXSortedSeries.put(nameSeries, serie);
+
+		this.hideSerie(nameSeries);
+
+		this.reShow(nameSeries);
+	}
+
+	/**
 	 * The Class TupleBoolLC.
 	 */
-	final class TupleBoolLC {
+	final public class TupleBoolLC {
 
 		/** The isVisible. */
 		public Boolean isVisible;
@@ -1007,18 +1380,31 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		/** The line chart. */
 		public LineChart<Number, Number> lineChart;
 
+		/** The is selected. */
+		public Boolean isSelected;
+
+		/** The translation. */
+		public Double translation = 0.0d;
+
 		/**
 		 * Instantiates a new tuple TupleBoolLC.
 		 *
 		 * @param isVisible
 		 *            the isVisible
+		 * @param isSelected
+		 *            the is selected
 		 * @param lineChart
 		 *            the line chart
+		 * @param translation
+		 *            the translation
 		 */
-		public TupleBoolLC(Boolean isVisible, LineChart<Number, Number> lineChart) {
+		public TupleBoolLC(Boolean isVisible, Boolean isSelected, LineChart<Number, Number> lineChart,
+				double translation) {
 			super();
 			this.isVisible = isVisible;
 			this.lineChart = lineChart;
+			this.isSelected = isSelected;
+			this.translation = translation;
 		}
 
 	}
@@ -1026,7 +1412,7 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 	/**
 	 * The Class TupleStrLC.
 	 */
-	final class TupleStrLC {
+	final public class TupleStrLC {
 
 		/** The unit. */
 		public String unit;
@@ -1071,101 +1457,159 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		 *            the event
 		 */
 		public void boldLineNearCursor(MouseEvent event) {
-			// TODO Auto-generated method stub
-			Long xValueLong = Math.round((double) baseChart.getXAxis().getValueForDisplay(event.getX()));
+			if (event.getButton() == MouseButton.PRIMARY || event.isPrimaryButtonDown()) {
+				event.consume();
+				// System.out.println("primaryButton down");
+				return; /* Draging mode */
+			} else {
 
-			int nbSeriesBadeChartPopup = baseChart.getData().size();
-			for (int i = 0; i < nbSeriesBadeChartPopup; i++) {
+				boolean isNear = false;
+				// System.out.println("boldLineNearCursor");
+				// TODO Auto-generated method stub
+				Long xValueLong = Math.round((double) baseChart.getXAxis().getValueForDisplay(event.getX()));
 
-				Number yValueForChart = getYValueForXBySeries(baseChart, xValueLong, i);
-				if (null == yValueForChart) {
-					continue;
-				}
-				Number yValueLower = (normalizeYValue(baseChart, event.getY() - 5));
-				Number yValueUpper = (normalizeYValue(baseChart, event.getY() + 5));
-				Label seriesName = new Label(
-						baseChart.getData().get(i).getName() + " -> " + baseChart.getYAxis().getLabel());
-				seriesName.setTextFill(chartColorMap.get(baseChart));
-				Number yValueUnderMouse = ((double) baseChart.getYAxis().getValueForDisplay(event.getY()));
-				if (isMouseNearLine(yValueForChart, yValueUnderMouse,
-						Math.abs(yValueLower.doubleValue() - yValueUpper.doubleValue()), baseChart)) {
-					seriesName.setStyle("-fx-font-weight: bold");
-					SimpleLineChartsMultiYAxis.hmBoldAxis.put(baseChart, true);
-					String oldStyle = baseChart.getData().get(i).getNode().getStyle();
+				int nbSeriesBaseChartPopup = baseChart.getData().size();
+				for (int i = 0; i < nbSeriesBaseChartPopup; i++) {
 
-					String newStyleString = newStyle(oldStyle, "-fx-stroke-width: 3px",
-							"-fx-stroke-width:\\s*\\d+(px|\\.?\\d+?)");
-					// lc.lineChart.getData().get(i).getNode().setStyle(
-					baseChart.getData().get(i).getNode().setStyle(newStyleString);
-
-					// Color for the Axis border with a transparency 80 => 0.5
-
-					baseChart.getYAxis().setStyle("-fx-border-width: 0 10 0 0;-fx-border-color: "
-							+ toRGBCodeTrans(chartColorMap.get(baseChart), "80") + " ;");
-
-				} else {
-					String oldStyle = baseChart.getData().get(i).getNode().getStyle();
-
-					String newStyleString = newStyle(oldStyle, "-fx-stroke-width: 1px",
-							"-fx-stroke-width:\\*\\d+(px|\\.?\\d+?)");
-
-					baseChart.getData().get(i).getNode().setStyle(newStyleString);
-
-					if (SimpleLineChartsMultiYAxis.hmBoldAxis.containsKey(baseChart)
-							&& !SimpleLineChartsMultiYAxis.hmBoldAxis.get(baseChart)) {
-						baseChart.getYAxis().setStyle("-fx-border-width: 0 1 0 1;");
-					}
-
-				}
-
-			}
-
-			for (TupleStrLC lc : backgroundCharts) {
-				int nbSeries = lc.lineChart.getData().size();
-				for (int i = 0; i < nbSeries; i++) {
-					Number yValueForChart = getYValueForXBySeries(lc.lineChart, xValueLong, i);
+					Number yValueForChart = getYValueForXBySeries(baseChart, xValueLong, i);
 					if (null == yValueForChart) {
 						continue;
 					}
-					Number yValueLower = (normalizeYValue(lc.lineChart, event.getY() - 5));
-					Number yValueUpper = (normalizeYValue(lc.lineChart, event.getY() + 5));
+					Number yValueLower = (normalizeYValue(baseChart, event.getY() - 5));
+					Number yValueUpper = (normalizeYValue(baseChart, event.getY() + 5));
 					Label seriesName = new Label(
-							lc.lineChart.getData().get(i).getName() + " -> " + lc.lineChart.getYAxis().getLabel());
-					seriesName.setTextFill(chartColorMap.get(lc.lineChart));
-					Number yValueUnderMouse = ((double) lc.lineChart.getYAxis().getValueForDisplay(event.getY()));
+							baseChart.getData().get(i).getName() + " -> " + baseChart.getYAxis().getLabel());
+					seriesName
+							.setTextFill(chartColorMap.getOrDefault(baseChart.getData().get(i).getName(), Color.BLACK));
+					Number yValueUnderMouse = ((double) baseChart.getYAxis().getValueForDisplay(event.getY()));
 					if (isMouseNearLine(yValueForChart, yValueUnderMouse,
-							Math.abs(yValueLower.doubleValue() - yValueUpper.doubleValue()), lc.lineChart)) {
+							Math.abs(yValueLower.doubleValue() - yValueUpper.doubleValue()), baseChart)) {
+						isNear = true;
+
+						this.fireEvent(new NearEvent(baseChart.getData().get(i).getName(), true));
 						seriesName.setStyle("-fx-font-weight: bold");
-						SimpleLineChartsMultiYAxis.hmBoldAxis.put(lc.lineChart, true);
-						String oldStyle = lc.lineChart.getData().get(i).getNode().getStyle();
+						SimpleLineChartsMultiYAxis.hmBoldAxis.put(baseChart, true);
+						String oldStyle = baseChart.getData().get(i).getNode().getStyle();
 
 						String newStyleString = newStyle(oldStyle, "-fx-stroke-width: 3px",
 								"-fx-stroke-width:\\s*\\d+(px|\\.?\\d+?)");
-
-						lc.lineChart.getData().get(i).getNode().setStyle(newStyleString);
+						// lc.lineChart.getData().get(i).getNode().setStyle(
+						baseChart.getData().get(i).getNode().setStyle(newStyleString);
 
 						// Color for the Axis border with a transparency 80 => 0.5
 
-						lc.lineChart.getYAxis().setStyle("-fx-border-width: 0 0 0 10;-fx-border-color: "
-								+ toRGBCodeTrans(chartColorMap.get(lc.lineChart), "80") + " ;");
+						baseChart.getYAxis()
+								.setStyle("-fx-border-width: 0 10 0 0;-fx-border-color: "
+										+ toRGBCodeTrans(chartColorMap
+												.getOrDefault(baseChart.getData().get(i).getName(), Color.BLACK), "80")
+										+ " ;");
+						styleChartLine(baseChart,
+								chartColorMap.getOrDefault(baseChart.getData().get(i).getName(), Color.BLACK));
 
 					} else {
-						String oldStyle = lc.lineChart.getData().get(i).getNode().getStyle();
+						if (!isNear) {
+							String oldStyle = baseChart.getData().get(i).getNode().getStyle();
+							this.fireEvent(new NearEvent(baseChart.getData().get(i).getName(), false));
+							String newStyleString = "";
 
-						String newStyleString = newStyle(oldStyle, "-fx-stroke-width: 1px",
-								"-fx-stroke-width:\\s*\\d+(px|\\.?\\d+?)");
+							if (!hmVisibleSeries.get(baseChart.getData().get(i).getName()).isSelected) {
+								newStyleString = newStyle(oldStyle, "-fx-stroke-width: 1px",
+										"-fx-stroke-width:\\*\\d+(px|\\.?\\d+?)");
 
-						lc.lineChart.getData().get(i).getNode().setStyle(newStyleString);
+								baseChart.getData().get(i).getNode().setStyle(newStyleString);
+								styleChartLine(baseChart,
+										chartColorMap.getOrDefault(baseChart.getData().get(i).getName(), Color.BLACK));
+							} else {
+								newStyleString = newStyle(oldStyle, "-fx-stroke-width: 3px",
+										"-fx-stroke-width:\\*\\d+(px|\\.?\\d+?)");
+								baseChart.getData().get(i).getNode().setStyle(newStyleString);
+								styleChartLine(baseChart,
+										chartColorMap.getOrDefault(baseChart.getData().get(i).getName(), Color.BLACK));
+							}
 
-						if (SimpleLineChartsMultiYAxis.hmBoldAxis.containsKey(lc.lineChart)
-								&& !SimpleLineChartsMultiYAxis.hmBoldAxis.get(lc.lineChart)) {
-							lc.lineChart.getYAxis().setStyle("-fx-border-width: 0 1 0 1;");
+							if (SimpleLineChartsMultiYAxis.hmBoldAxis.containsKey(baseChart)
+									&& !SimpleLineChartsMultiYAxis.hmBoldAxis.get(baseChart)) {
+								baseChart.getYAxis().setStyle("-fx-border-width: 0 1 0 1;");
+							}
+
 						}
+					}
 
+				}
+				isNear = false;
+				for (TupleStrLC lc : backgroundCharts) {
+					int nbSeries = lc.lineChart.getData().size();
+
+					for (int i = 0; i < nbSeries; i++) {
+						Number yValueForChart = getYValueForXBySeries(lc.lineChart, xValueLong, i);
+						if (null == yValueForChart) {
+							continue;
+						}
+						Number yValueLower = (normalizeYValue(lc.lineChart, event.getY() - 5));
+						Number yValueUpper = (normalizeYValue(lc.lineChart, event.getY() + 5));
+						Label seriesName = new Label(
+								lc.lineChart.getData().get(i).getName() + " -> " + lc.lineChart.getYAxis().getLabel());
+						seriesName.setTextFill(
+								chartColorMap.getOrDefault(lc.lineChart.getData().get(i).getName(), Color.BLACK));
+						Number yValueUnderMouse = ((double) lc.lineChart.getYAxis().getValueForDisplay(event.getY()));
+						if (isMouseNearLine(yValueForChart, yValueUnderMouse,
+								Math.abs(yValueLower.doubleValue() - yValueUpper.doubleValue()), lc.lineChart)) {
+							isNear = true;
+							this.fireEvent(new NearEvent(lc.lineChart.getData().get(i).getName(), true));
+							// System.out.println("yes near :" + lc.lineChart.getData().get(i).getName());
+							seriesName.setStyle("-fx-font-weight: bold");
+							SimpleLineChartsMultiYAxis.hmBoldAxis.put(lc.lineChart, true);
+							String oldStyle = lc.lineChart.getData().get(i).getNode().getStyle();
+
+							String newStyleString = newStyle(oldStyle, "-fx-stroke-width: 3px",
+									"-fx-stroke-width:\\s*\\d+(px|\\.?\\d+?)");
+
+							lc.lineChart.getData().get(i).getNode().setStyle(newStyleString);
+
+							// Color for the Axis border with a transparency 80 => 0.5
+
+							lc.lineChart.getYAxis()
+									.setStyle("-fx-border-width: 0 0 0 10;-fx-border-color: "
+											+ toRGBCodeTrans(chartColorMap.getOrDefault(
+													lc.lineChart.getData().get(i).getName(), Color.BLACK), "80")
+											+ " ;");
+
+							styleChartLine(lc.lineChart,
+									chartColorMap.getOrDefault(lc.lineChart.getData().get(i).getName(), Color.BLACK));
+
+						} else {
+							if (!isNear) {
+								String oldStyle = lc.lineChart.getData().get(i).getNode().getStyle();
+								this.fireEvent(new NearEvent(lc.lineChart.getData().get(i).getName(), false));
+								String newStyleString = "";
+								if (SimpleLineChartsMultiYAxis.hmBoldAxis.containsKey(lc.lineChart)
+										&& !SimpleLineChartsMultiYAxis.hmBoldAxis.get(lc.lineChart)) {
+									lc.lineChart.getYAxis().setStyle("-fx-border-width: 0 1 0 1;");
+								}
+
+								if (!hmVisibleSeries.get(lc.lineChart.getData().get(i).getName()).isSelected) {
+									newStyleString = newStyle(oldStyle, "-fx-stroke-width: 1px",
+											"-fx-stroke-width:\\*\\d+(px|\\.?\\d+?)");
+
+									lc.lineChart.getData().get(i).getNode().setStyle(newStyleString);
+									styleChartLine(lc.lineChart, chartColorMap
+											.getOrDefault(lc.lineChart.getData().get(i).getName(), Color.BLACK));
+								} else {
+									newStyleString = newStyle(oldStyle, "-fx-stroke-width: 3px",
+											"-fx-stroke-width:\\*\\d+(px|\\.?\\d+?)");
+									lc.lineChart.getData().get(i).getNode().setStyle(newStyleString);
+									styleChartLine(lc.lineChart, chartColorMap
+											.getOrDefault(lc.lineChart.getData().get(i).getName(), Color.BLACK));
+								}
+							}
+						}
 					}
 				}
 			}
 		}
+
+		/** The global is near. */
+		private boolean globalIsNear = false;
 
 		/**
 		 * Show chart description by series.
@@ -1174,24 +1618,33 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		 *            the event
 		 */
 		public void showChartDescriptionBySeries(MouseEvent event) {
-			getChildren().clear();
+
 			if (isPopupMuted) {
 				setVisible(false);
-				boldLineNearCursor(event);
+
+				event.consume();
 				return;
 			}
+			if (!event.isPrimaryButtonDown()) {
 
+				boldLineNearCursor(event);
+			} else {
+
+				event.consume();
+				return;
+			}
+			getChildren().clear();
 			Long xValueLong = Math.round((double) baseChart.getXAxis().getValueForDisplay(event.getX()));
-
-			int nbSeriesBadeChartPopup = baseChart.getData().size();
-			for (int i = 0; i < nbSeriesBadeChartPopup; i++) {
+			globalIsNear = false;
+			int nbSeriesBaseChartPopup = baseChart.getData().size();
+			for (int i = 0; i < nbSeriesBaseChartPopup; i++) {
 				HBox baseChartPopupRow = buildPopupRowBySeries(event, xValueLong, baseChart, i);
 
 				if (baseChartPopupRow != null) {
 					getChildren().add(baseChartPopupRow);
 				}
 			}
-
+			globalIsNear = false;
 			for (TupleStrLC lc : backgroundCharts) {
 				int nbSeries = lc.lineChart.getData().size();
 				for (int i = 0; i < nbSeries; i++) {
@@ -1204,37 +1657,6 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				}
 			}
 
-		}
-
-		/**
-		 * New style.
-		 *
-		 * @param OldStyle
-		 *            the old style
-		 * @param addNewStyle
-		 *            the add new style
-		 * @param regextoReplace
-		 *            the regexto replace
-		 * @return the string
-		 */
-		private String newStyle(String OldStyle, String addNewStyle, String regextoReplace) {
-			StringBuilder strB = new StringBuilder();
-			String[] arrayOldStyle = OldStyle.split(";");
-
-			for (String frag : arrayOldStyle) {
-				if (frag.trim().matches(regextoReplace)) {
-					/* Skip the Value */
-
-				} else {
-
-					strB.append(frag).append(";");
-				}
-
-			}
-			/* Added only Once at the end */
-			strB.append(addNewStyle).append(";");
-
-			return strB.toString();
 		}
 
 		/**
@@ -1252,9 +1674,11 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 		 */
 		private HBox buildPopupRowBySeries(MouseEvent event, Long xValueLong, LineChart<Number, Number> lineChart,
 				int idxSeries) {
+
 			Label seriesName = new Label(
 					lineChart.getData().get(idxSeries).getName() + " -> " + lineChart.getYAxis().getLabel());
-			seriesName.setTextFill(chartColorMap.get(lineChart));
+			seriesName
+					.setTextFill(chartColorMap.getOrDefault(lineChart.getData().get(idxSeries).getName(), Color.BLACK));
 
 			Number yValueForChart = getYValueForXBySeries(lineChart, xValueLong, idxSeries);
 			if (yValueForChart == null) {
@@ -1268,6 +1692,8 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 
 			if (isMouseNearLine(yValueForChart, yValueUnderMouse,
 					Math.abs(yValueLower.doubleValue() - yValueUpper.doubleValue()), lineChart)) {
+				globalIsNear = true;
+				this.fireEvent(new NearEvent(lineChart.getData().get(idxSeries).getName(), true));
 				seriesName.setStyle("-fx-font-weight: bold");
 				SimpleLineChartsMultiYAxis.hmBoldAxis.put(lineChart, true);
 				String oldStyle = lineChart.getData().get(idxSeries).getNode().getStyle();
@@ -1279,22 +1705,45 @@ public class SimpleLineChartsMultiYAxis extends StackPane {
 				if (lineChart.equals(baseChart)) {
 					// Color for the Axis border with a transparency 80 => 0.5
 
-					lineChart.getYAxis().setStyle("-fx-border-width: 0 10 0 0;-fx-border-color: "
-							+ toRGBCodeTrans(chartColorMap.get(lineChart), "80") + " ;");
+					lineChart.getYAxis().setStyle("-fx-border-width: 0 10 0 0;-fx-border-color: " + toRGBCodeTrans(
+							chartColorMap.getOrDefault(lineChart.getData().get(idxSeries).getName(), Color.BLACK), "80")
+							+ " ;");
 				} else {
-					lineChart.getYAxis().setStyle("-fx-border-width: 0 0 0 10;-fx-border-color:"
-							+ toRGBCodeTrans(chartColorMap.get(lineChart), "80") + " ;");
+					lineChart.getYAxis().setStyle("-fx-border-width: 0 0 0 10;-fx-border-color:" + toRGBCodeTrans(
+							chartColorMap.getOrDefault(lineChart.getData().get(idxSeries).getName(), Color.BLACK), "80")
+							+ " ;");
 				}
+				styleChartLine(lineChart,
+						chartColorMap.getOrDefault(lineChart.getData().get(idxSeries).getName(), Color.BLACK));
+
 			} else {
-				String oldStyle = lineChart.getData().get(idxSeries).getNode().getStyle();
+				if (!globalIsNear) {
+					String oldStyle = lineChart.getData().get(idxSeries).getNode().getStyle();
+					this.fireEvent(new NearEvent(lineChart.getData().get(idxSeries).getName(), false));
+					String newStyleString = "";
+					//
+					// lineChart.getData().get(idxSeries).getNode().setStyle(newStyleString);
+					if (SimpleLineChartsMultiYAxis.hmBoldAxis.containsKey(lineChart)
+							&& !SimpleLineChartsMultiYAxis.hmBoldAxis.get(lineChart)) {
+						lineChart.getYAxis().setStyle("-fx-border-width: 0 1 0 1;");
+					}
 
-				String newStyleString = newStyle(oldStyle, "-fx-stroke-width: 1px",
-						"-fx-stroke-width:\\s*\\d+(px|\\.?\\d+?)");
+					if (!hmVisibleSeries.get(lineChart.getData().get(idxSeries).getName()).isSelected) {
+						newStyleString = newStyle(oldStyle, "-fx-stroke-width: 1px",
+								"-fx-stroke-width:\\*\\d+(px|\\.?\\d+?)");
 
-				lineChart.getData().get(idxSeries).getNode().setStyle(newStyleString);
-				if (SimpleLineChartsMultiYAxis.hmBoldAxis.containsKey(lineChart)
-						&& !SimpleLineChartsMultiYAxis.hmBoldAxis.get(lineChart)) {
-					lineChart.getYAxis().setStyle("-fx-border-width: 0 1 0 1;");
+						lineChart.getData().get(idxSeries).getNode().setStyle(newStyleString);
+						styleChartLine(lineChart,
+								chartColorMap.getOrDefault(lineChart.getData().get(idxSeries).getName(), Color.BLACK));
+					} else {
+						// System.out.println("Not Near and Selected for " +
+						// lineChart.getData().get(idxSeries).getName());
+						newStyleString = newStyle(oldStyle, "-fx-stroke-width: 3px",
+								"-fx-stroke-width:\\*\\d+(px|\\.?\\d+?)");
+						lineChart.getData().get(idxSeries).getNode().setStyle(newStyleString);
+						styleChartLine(lineChart,
+								chartColorMap.getOrDefault(lineChart.getData().get(idxSeries).getName(), Color.BLACK));
+					}
 				}
 				if (!isPopupFullVisible)
 					return null; // the line is not visible

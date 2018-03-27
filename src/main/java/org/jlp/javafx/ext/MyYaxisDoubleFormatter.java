@@ -24,6 +24,12 @@ import javafx.util.StringConverter;
  */
 public class MyYaxisDoubleFormatter extends StringConverter<Number> {
 
+	/**
+	 * From string.
+	 *
+	 * @param aNumber the a number
+	 * @return the number
+	 */
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -36,6 +42,12 @@ public class MyYaxisDoubleFormatter extends StringConverter<Number> {
 		return null;
 	}
 
+	/**
+	 * To string.
+	 *
+	 * @param aNumber the a number
+	 * @return the string
+	 */
 	/* (non-Javadoc)
 	 * @see javafx.util.StringConverter#toString(java.lang.Object)
 	 */

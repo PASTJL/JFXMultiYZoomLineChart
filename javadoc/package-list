@@ -1,3 +1,7 @@
 org.jlp.javafx
+org.jlp.javafx.common
+org.jlp.javafx.datas
+org.jlp.javafx.datas.csv
 org.jlp.javafx.example
 org.jlp.javafx.ext
+org.jlp.javafx.richview

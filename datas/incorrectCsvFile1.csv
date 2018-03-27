@@ -1,0 +1,4 @@
+nothing;sizeHeapBefore_Avg (byte);sizeHeapAfter_Avg (byte);gcDuration_Avg (ms);throughput_Avg (percent);memThroughput_Avg (Kbyte/s);nurseryGCsizeHeapBefore_Avg (byte);nurseryGCsizeHeapAfter_Avg (byte);nurseryGCDuration_Avg (ms);fullGCsizeHeapBefore_Avg (byte);fullGCsizeHeapAfter_Avg (byte);fullGCDuration_Avg (ms)
+2013/06/18:14:26:36;1.7097728E8;6.9330944E7;61.453;99.44636936936936;9157.327567567567;1.7097728E8;6.9330944E7;61.453;;;;
+2013/06/18:14:26:38;2.05118464E8;1.0786304E8;54.862;97.90282874617738;14501.440653251677;2.05118464E8;1.0786304E8;54.862;;;;
+2013/06/18:14:26:42;2.21520896E8;1.24199936E8;44.468;98.94375296912114;16524.752872922014;2.21520896E8;1.24199936E8;44.468;;;;
