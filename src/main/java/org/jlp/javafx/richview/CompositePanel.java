@@ -282,6 +282,8 @@ public class CompositePanel extends BorderPane {
 
 	/** The cb verbosity. */
 	public static ComboBox<String> cbVerbosity = new ComboBox<String>();
+
+	/** The name listener. */
 	public static ChangeListener<String> nameListener;
 	/** The fltbv. */
 	FillTableView fltbv = new FillTableView();
